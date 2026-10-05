@@ -28,7 +28,48 @@ function getDB(): PDO {
             updated_at  TEXT DEFAULT (datetime('now'))
         )
     ");
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS customers (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            name       TEXT NOT NULL DEFAULT '',
+            address    TEXT NOT NULL DEFAULT '',
+            city       TEXT NOT NULL DEFAULT '',
+            contact    TEXT NOT NULL DEFAULT '',
+            phone      TEXT NOT NULL DEFAULT '',
+            vat        TEXT NOT NULL DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now'))
+        )
+    ");
     return $pdo;
+}
+
+// ── Upsert customer from document data (called on save/update) ─
+function upsertCustomer(PDO $pdo, array $cust): void {
+    $name = trim($cust['name'] ?? '');
+    if ($name === '') return;
+    $existing = $pdo->prepare("SELECT id FROM customers WHERE name = ? COLLATE NOCASE LIMIT 1");
+    $existing->execute([$name]);
+    $row = $existing->fetch();
+    if ($row) {
+        $pdo->prepare("
+            UPDATE customers SET address=?, city=?, contact=?, phone=?, vat=?, updated_at=datetime('now')
+            WHERE id=?
+        ")->execute([
+            trim($cust['address'] ?? ''), trim($cust['city'] ?? ''),
+            trim($cust['contact'] ?? ''), trim($cust['phone'] ?? ''),
+            trim($cust['vat'] ?? ''), $row['id'],
+        ]);
+    } else {
+        $pdo->prepare("
+            INSERT INTO customers (name, address, city, contact, phone, vat)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ")->execute([
+            $name, trim($cust['address'] ?? ''), trim($cust['city'] ?? ''),
+            trim($cust['contact'] ?? ''), trim($cust['phone'] ?? ''),
+            trim($cust['vat'] ?? ''),
+        ]);
+    }
 }
 
 function respond(array $payload, int $code = 200): never {
@@ -155,6 +196,7 @@ try {
         ");
         $stmt->execute([$type, $number, $date, $customer, json_encode($data, JSON_UNESCAPED_UNICODE)]);
         $newId = $pdo->lastInsertId();
+        upsertCustomer($pdo, $data['customer'] ?? []);
         respond(['ok' => true, 'id' => $newId]);
     }
 
@@ -177,6 +219,7 @@ try {
             WHERE id=?
         ");
         $stmt->execute([$type, $number, $date, $status, $customer, json_encode($data, JSON_UNESCAPED_UNICODE), $id]);
+        upsertCustomer($pdo, $data['customer'] ?? []);
         respond(['ok' => true, 'id' => $id]);
     }
 
@@ -210,6 +253,73 @@ try {
     if ($action === 'default' && $method === 'GET') {
         $type = strtoupper(trim($_GET['type'] ?? 'INVOICE'));
         respond(['ok' => true, 'data' => defaultDocument($type)]);
+    }
+
+    // ── CUSTOMERS ─────────────────────────────────────────────
+
+    // LIST customers
+    if ($action === 'customers' && $method === 'GET') {
+        $q = trim($_GET['q'] ?? '');
+        $sql = "SELECT * FROM customers WHERE 1=1";
+        $params = [];
+        if ($q !== '') {
+            $sql .= " AND (name LIKE :q OR city LIKE :q OR contact LIKE :q)";
+            $params[':q'] = "%$q%";
+        }
+        $sql .= " ORDER BY name ASC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        respond(['ok' => true, 'customers' => $stmt->fetchAll()]);
+    }
+
+    // GET one customer
+    if ($action === 'customer_get' && $method === 'GET') {
+        if (!$id) error('Missing id');
+        $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        if (!$row) error('Customer not found', 404);
+        respond(['ok' => true, 'customer' => $row]);
+    }
+
+    // CREATE customer
+    if ($action === 'customer_save' && $method === 'POST') {
+        $body = json_decode(file_get_contents('php://input'), true) ?? [];
+        $name = trim($body['name'] ?? '');
+        if ($name === '') error('Name is required');
+        $pdo->prepare("
+            INSERT INTO customers (name, address, city, contact, phone, vat)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ")->execute([
+            $name, trim($body['address'] ?? ''), trim($body['city'] ?? ''),
+            trim($body['contact'] ?? ''), trim($body['phone'] ?? ''),
+            trim($body['vat'] ?? ''),
+        ]);
+        respond(['ok' => true, 'id' => $pdo->lastInsertId()]);
+    }
+
+    // UPDATE customer
+    if ($action === 'customer_update' && $method === 'POST') {
+        if (!$id) error('Missing id');
+        $body = json_decode(file_get_contents('php://input'), true) ?? [];
+        $name = trim($body['name'] ?? '');
+        if ($name === '') error('Name is required');
+        $pdo->prepare("
+            UPDATE customers SET name=?, address=?, city=?, contact=?, phone=?, vat=?, updated_at=datetime('now')
+            WHERE id=?
+        ")->execute([
+            $name, trim($body['address'] ?? ''), trim($body['city'] ?? ''),
+            trim($body['contact'] ?? ''), trim($body['phone'] ?? ''),
+            trim($body['vat'] ?? ''), $id,
+        ]);
+        respond(['ok' => true, 'id' => $id]);
+    }
+
+    // DELETE customer
+    if ($action === 'customer_delete' && $method === 'POST') {
+        if (!$id) error('Missing id');
+        $pdo->prepare("DELETE FROM customers WHERE id = ?")->execute([$id]);
+        respond(['ok' => true]);
     }
 
     error('Unknown action or method', 404);

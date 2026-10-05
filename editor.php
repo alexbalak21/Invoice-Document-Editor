@@ -107,8 +107,9 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
 
       <!-- Section: Bill To -->
       <div class="form-section">
-        <div class="form-section-header open" data-section="customer">
-          Bill To <span class="chevron">▼</span>
+        <div class="form-section-header open" data-section="customer" style="justify-content:space-between">
+          <span>Bill To <span class="chevron">▼</span></span>
+          <button type="button" id="btn-pick-customer" class="btn-pick-customer" title="Search existing customers" onclick="event.stopPropagation();openCustomerPicker()">📋 Pick customer</button>
         </div>
         <div class="form-section-body open" id="sec-customer">
           <div class="field"><label>Company / Customer Name</label><input id="f-cust-name" type="text" placeholder="Pureture"></div>
@@ -229,6 +230,25 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
   </main>
 
 </div><!-- /app-body -->
+
+<!-- Customer picker modal -->
+<div id="customer-modal" class="cust-modal-overlay" style="display:none" onclick="if(event.target===this)closeCustomerPicker()">
+  <div class="cust-modal">
+    <div class="cust-modal-header">
+      <h3>Pick a Customer</h3>
+      <button class="cust-modal-close" onclick="closeCustomerPicker()">✕</button>
+    </div>
+    <div class="cust-modal-search">
+      <input type="text" id="cust-search" placeholder="Search by name, city, contact…" oninput="searchCustomers(this.value)" autocomplete="off">
+    </div>
+    <div class="cust-modal-list" id="cust-modal-list">
+      <div class="cust-empty">Loading…</div>
+    </div>
+    <div class="cust-modal-footer">
+      <a href="customers.php" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none">⚙ Manage customers</a>
+    </div>
+  </div>
+</div>
 
 <!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
@@ -801,6 +821,76 @@ function toast(msg, type = '') {
   requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
 }
+
+// ── Customer Picker ─────────────────────────────────────────
+let custSearchTimer = null;
+
+function openCustomerPicker() {
+  document.getElementById('customer-modal').style.display = 'flex';
+  const input = document.getElementById('cust-search');
+  input.value = '';
+  input.focus();
+  searchCustomers('');
+}
+
+function closeCustomerPicker() {
+  document.getElementById('customer-modal').style.display = 'none';
+}
+
+function searchCustomers(q) {
+  clearTimeout(custSearchTimer);
+  custSearchTimer = setTimeout(async () => {
+    const list = document.getElementById('cust-modal-list');
+    list.innerHTML = '<div class="cust-empty">Searching…</div>';
+    try {
+      const res  = await fetch(`api.php?action=customers&q=${encodeURIComponent(q)}`);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      renderCustomerList(json.customers);
+    } catch (e) {
+      list.innerHTML = `<div class="cust-empty">Error: ${esc(e.message)}</div>`;
+    }
+  }, 180);
+}
+
+function renderCustomerList(customers) {
+  const list = document.getElementById('cust-modal-list');
+  if (!customers.length) {
+    list.innerHTML = '<div class="cust-empty">No customers found.</div>';
+    return;
+  }
+  list.innerHTML = customers.map(c => `
+    <div class="cust-row" onclick="selectCustomer(${c.id})">
+      <div class="cust-row-name">${esc(c.name)}</div>
+      <div class="cust-row-detail">${[c.city, c.contact, c.phone].filter(Boolean).map(esc).join(' · ')}</div>
+    </div>
+  `).join('');
+}
+
+async function selectCustomer(id) {
+  try {
+    const res  = await fetch(`api.php?action=customer_get&id=${id}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    const c = json.customer;
+    set('f-cust-name',    c.name    ?? '');
+    set('f-cust-addr',    c.address ?? '');
+    set('f-cust-city',    c.city    ?? '');
+    set('f-cust-contact', c.contact ?? '');
+    set('f-cust-phone',   c.phone   ?? '');
+    set('f-cust-vat',     c.vat     ?? '');
+    closeCustomerPicker();
+    onFormChange();
+    toast(`Customer loaded: ${c.name}`, 'success');
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// Keyboard shortcut — Escape closes modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeCustomerPicker();
+});
 
 // ── Init ────────────────────────────────────────────────────
 async function init() {

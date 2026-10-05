@@ -174,6 +174,14 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
           Bank Details <span class="chevron">▼</span>
         </div>
         <div class="form-section-body" id="sec-bank">
+          <div class="field">
+            <label>Preset</label>
+            <select id="f-bank-preset">
+              <option value="eur">EUR — Banque Populaire, France</option>
+              <option value="usd">USD — International Wire</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
           <div class="field"><label>Section Label</label><input id="f-bank-label" type="text" placeholder="Bank Details EUR - Banque Populaire, France"></div>
           <div class="field"><label>Beneficiary</label><input id="f-bank-bene" type="text" placeholder="SAS NOVOCIB"></div>
           <div class="field"><label>Bank Name</label><input id="f-bank-name" type="text" placeholder="BANQUE POPULAIRE..."></div>
@@ -234,6 +242,46 @@ let isDirty     = false;
 
 // ── Currency symbols map ──
 const CURRENCY_SYMBOLS = { EUR: '€', USD: '$', GBP: '£', CHF: 'CHF ' };
+
+// ── Bank presets ──────────────────────────────────────────
+const BANK_PRESETS = {
+  eur: {
+    label:        'Bank Details EUR - Banque Populaire, France',
+    beneficiary:  'SAS NOVOCIB',
+    bank_name:    'BANQUE POPULAIRE AUVERGNE RHÔNE ALPES (BPAURA)',
+    bank_address: '215 Avenue Jean Jaurès, 69007 Lyon, France',
+    iban:         'FR76 1680 7004 0081 0876 0421 151',
+    bic:          'CCBPFRPPGRE',
+  },
+  usd: {
+    label:        'Bank Details International Wire (USD)',
+    beneficiary:  'SAS NOVOCIB-CAV USD',
+    bank_name:    'BANQUE POPULAIRE AUVERGNE RHÔNE ALPES (BPAURA)',
+    bank_address: '215 Avenue Jean Jaurès, 69007 Lyon, France',
+    iban:         'FR76 1680 7004 0081 3911 3449 109',
+    bic:          'CCBPFRPPGRE',
+  },
+};
+
+function detectBankPreset(bank) {
+  if (!bank) return 'eur';
+  for (const [key, p] of Object.entries(BANK_PRESETS)) {
+    if (p.iban === (bank.iban || '').trim()) return key;
+  }
+  return 'custom';
+}
+
+document.getElementById('f-bank-preset').addEventListener('change', function () {
+  const preset = BANK_PRESETS[this.value];
+  if (!preset) return; // custom — leave fields as-is
+  document.getElementById('f-bank-label').value = preset.label;
+  document.getElementById('f-bank-bene').value  = preset.beneficiary;
+  document.getElementById('f-bank-name').value  = preset.bank_name;
+  document.getElementById('f-bank-addr').value  = preset.bank_address;
+  document.getElementById('f-bank-iban').value  = preset.iban;
+  document.getElementById('f-bank-bic').value   = preset.bic;
+  onFormChange();
+});
 
 // ── Collapse sections ──────────────────────────────────────
 document.querySelectorAll('.form-section-header').forEach(hdr => {
@@ -408,6 +456,7 @@ function populateForm(d) {
   set('f-bank-addr', b.bank_address ?? '');
   set('f-bank-iban', b.iban ?? '');
   set('f-bank-bic', b.bic ?? '');
+  document.getElementById('f-bank-preset').value = detectBankPreset(b);
 
   // Items
   document.getElementById('items-tbody').innerHTML = '';

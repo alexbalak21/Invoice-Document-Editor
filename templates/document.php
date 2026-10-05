@@ -2,10 +2,15 @@
 /**
  * templates/document.php
  * Renders $doc (array from JSON) as the A4 invoice/quote HTML body.
- * Can be included by preview.php (full page) or called via JS innerHTML.
+ * Included by preview.php — $doc must be set by the caller.
  */
 
-$d     = $doc; // alias
+if (!isset($doc) || !is_array($doc)) {
+    echo '<p style="font-family:sans-serif;padding:40px;color:red">Error: no document data provided to template.</p>';
+    return;
+}
+
+$d = $doc; // alias
 $sym   = htmlspecialchars($d['currency_symbol'] ?? '€', ENT_QUOTES);
 $type  = htmlspecialchars($d['type'] ?? 'INVOICE', ENT_QUOTES);
 

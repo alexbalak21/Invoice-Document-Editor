@@ -43,7 +43,10 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
     <span id="topbar-docnum"></span>
   </div>
 
-  <span id="topbar-type-badge" class="topbar-doc-type">INVOICE</span>
+  <div class="topbar-center">
+    <span id="topbar-type-badge" class="topbar-doc-type">INVOICE</span>
+    <span id="topbar-docnum-center"></span>
+  </div>
 
   <a href="index.php" class="btn btn-ghost btn-sm">← History</a>
   <button class="btn btn-ghost btn-sm" id="btn-export" title="Download document as JSON">⬇ Export JSON</button>
@@ -141,7 +144,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
             </thead>
             <tbody id="items-tbody"></tbody>
           </table>
-          <button class="btn btn-ghost btn-sm btn-add-row" id="btn-add-item">+ Add line</button>
+          <button class="btn btn-primary btn-sm btn-add-row" id="btn-add-item">+ Add line</button>
         </div>
       </div>
 
@@ -706,6 +709,8 @@ function updateTopBar(d) {
   const badge = document.getElementById('topbar-type-badge');
   badge.textContent = d.type || 'INVOICE';
   badge.className = 'topbar-doc-type';
+  const numCenter = document.getElementById('topbar-docnum-center');
+  if (numCenter) numCenter.textContent = d.number ? `— ${d.number}` : '';
 }
 
 // ── Wire all form inputs ────────────────────────────────────

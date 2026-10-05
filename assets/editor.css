@@ -16,7 +16,7 @@
     --ui-input-bg: #f8f9fb;
     --ui-input-border: #cdd1da;
     --ui-focus: #3771c8;
-    --sidebar-w: 400px;
+    --sidebar-w: 700px;
     --topbar-h: 52px;
     --font: "Segoe UI", system-ui, -apple-system, sans-serif;
     --font-mono: "Cascadia Code", "Fira Code", monospace;
@@ -33,10 +33,13 @@ html, body { height: 100%; overflow: hidden; font-family: var(--font); color: va
     padding: 0 18px;
     gap: 12px;
     flex-shrink: 0;
+    position: relative;
 }
 .topbar-brand { color: white; font-weight: 700; font-size: 15px; letter-spacing: .3px; margin-right: auto; display: flex; align-items: center; gap: 8px; }
 .topbar-brand span { opacity: .65; font-weight: 400; font-size: 12.5px; }
-.topbar-doc-type { color: white; font-size: 12px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 4px; padding: 4px 10px; font-weight: 600; letter-spacing: .5px; }
+.topbar-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; pointer-events: none; }
+.topbar-doc-type { color: white; font-size: 17px; font-weight: 700; letter-spacing: .8px; opacity: .95; }
+.topbar-center span:last-child { color: rgba(255,255,255,.55); font-size: 13px; font-weight: 400; }
 
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 5px; border: none; cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 500; transition: background .15s, opacity .15s; text-decoration: none; white-space: nowrap; }
 .btn-primary { background: white; color: var(--ui-primary); }

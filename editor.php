@@ -698,6 +698,7 @@ function escNl(s) {
 // ── On any form change ─────────────────────────────────────
 function onFormChange() {
   const d = collectDoc();
+  docData = d;           // keep docData always in sync
   renderPreview(d);
   updateTopBar(d);
   isDirty = true;
@@ -781,16 +782,18 @@ document.getElementById('btn-print').addEventListener('click', async () => {
 
 // ── Export JSON ─────────────────────────────────────────────
 document.getElementById('btn-export').addEventListener('click', () => {
-  const d    = collectDoc();
-  const name = [d.type, d.number].filter(Boolean).join('_').replace(/\s+/g, '-') || 'document';
-  const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+  // Use docData (always up-to-date) — strip logo to keep the file small & AI-friendly
+  const d = docData ? { ...docData } : collectDoc();
+  const exportDoc = { ...d, issuer: { ...d.issuer, logo_base64: '' } };
+  const name = [exportDoc.type, exportDoc.number].filter(Boolean).join('_').replace(/\s+/g, '-') || 'document';
+  const blob = new Blob([JSON.stringify(exportDoc, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
   a.download = name + '.json';
   a.click();
   URL.revokeObjectURL(url);
-  toast('JSON exported', 'success');
+  toast('JSON exported — ' + name + '.json', 'success');
 });
 
 // ── Import JSON ─────────────────────────────────────────────

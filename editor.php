@@ -9,6 +9,13 @@ define('DB_PATH', __DIR__ . '/db/documents.sqlite');
 $editId = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $newType = strtoupper(trim($_GET['type'] ?? 'INVOICE'));
 
+// ── Logo: embed as base64 for JS preview ──
+$logoPath = __DIR__ . '/assets/logo.png';
+$logoDataUri = '';
+if (file_exists($logoPath)) {
+    $logoDataUri = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+}
+
 // Load existing document for pre-fill (server-side, for page title only)
 $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
 ?>
@@ -218,6 +225,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
 
 const EDIT_ID   = <?= $editId ? (int)$editId : 'null' ?>;
 const NEW_TYPE  = <?= json_encode($newType) ?>;
+const LOGO_DATA_URI = <?= json_encode($logoDataUri) ?>;
 
 let currentId   = EDIT_ID;
 let docData     = null;
@@ -261,7 +269,7 @@ function collectDoc() {
       city:        v('f-issuer-city'),
       email:       v('f-issuer-email'),
       legal:       v('f-issuer-legal'),
-      logo_base64: docData?.issuer?.logo_base64 ?? '',
+      logo_base64: LOGO_DATA_URI,
     },
     customer: {
       name:    v('f-cust-name'),
@@ -495,7 +503,7 @@ function renderPreview(d) {
 
   // ── Issuer ──
   const iss = d.issuer || {};
-  const logoHtml = iss.logo_base64 ? `<img class="logo" src="${esc(iss.logo_base64)}" alt="Logo">` : '';
+  const logoHtml = LOGO_DATA_URI ? `<img class=\"logo\" src=\"${LOGO_DATA_URI}\" alt=\"Logo\">` : '';
 
   document.getElementById('preview-doc').innerHTML = `
 <div class="page">

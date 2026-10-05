@@ -9,6 +9,14 @@ $d     = $doc; // alias
 $sym   = htmlspecialchars($d['currency_symbol'] ?? '€', ENT_QUOTES);
 $type  = htmlspecialchars($d['type'] ?? 'INVOICE', ENT_QUOTES);
 
+// ── Hardcoded logo — always loaded from templates/logo.png ──
+$logoPath = __DIR__ . '/../assets/logo.png';
+$logoTag  = '';
+if (file_exists($logoPath)) {
+    $logoB64 = base64_encode(file_get_contents($logoPath));
+    $logoTag = '<img class="logo" src="data:image/png;base64,' . $logoB64 . '" alt="Logo">';
+}
+
 // ── Format money ──
 function fmtMoney(mixed $val, string $sym): string {
     if ($val === '' || $val === null) return '';
@@ -39,9 +47,7 @@ if (!empty($d['tracking']))     $extraRows[] = ['Tracking:', htmlspecialchars($d
 
   <header class="doc-header">
     <div class="company">
-      <?php if (!empty($d['issuer']['logo_base64'])): ?>
-        <img class="logo" src="<?= htmlspecialchars($d['issuer']['logo_base64']) ?>" alt="Logo">
-      <?php endif; ?>
+      <?= $logoTag ?>
       <h2><?= htmlspecialchars($d['issuer']['name'] ?? '') ?></h2>
       <p><?= htmlspecialchars($d['issuer']['address'] ?? '') ?></p>
       <p><?= htmlspecialchars($d['issuer']['city'] ?? '') ?></p>

@@ -1,0 +1,105 @@
+/* ── Document / A4 invoice styles ── */
+:root {
+    --primary: #3771c8;
+    --primary-light: #e8f0fc;
+    --text: #222;
+    --text-light: #666;
+    --border: #b7b7b7;
+    --border-dark: #888;
+    --background: #ffffff;
+    --table-header: #e6ebf5;
+    --font: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+.page {
+    width: 210mm;
+    min-height: 281mm;
+    background: white;
+    padding: 8mm;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--text);
+    box-shadow: 0 4px 24px rgba(0,0,0,.13);
+    position: relative;
+}
+
+/* Header */
+.doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+.company { width: 48%; }
+.logo { max-width: 160px; max-height: 60px; margin-bottom: 10px; height: auto; width: auto; display: block; }
+.company h2 { font-size: 16px; margin-bottom: 5px; }
+.company p { color: var(--text-light); margin: 2px 0; }
+.company-legal { margin-top: 8px; font-size: 10.5px; color: var(--text-light); line-height: 1.6; }
+
+.invoice-title { width: 42%; text-align: right; }
+.invoice-title h1 { color: var(--primary); font-size: 27px; letter-spacing: 2px; margin-bottom: 10px; }
+
+.invoice-info { text-align: center; width: 100%; border-collapse: collapse; }
+.invoice-info th { background: var(--table-header); border: 1px solid var(--border-dark); font-size: 10px; padding: 3px 4px; text-transform: uppercase; }
+.invoice-info td { border: 1px solid var(--border-dark); text-align: center; padding: 4px; font-size: 11px; }
+.invoice-info.extra-info td { text-align: left; }
+.invoice-info.extra-info { margin-top: 8px; }
+
+/* Bill-to */
+.bill-to { margin-bottom: 10px; margin-top: 14px; }
+.section-title { display: inline-block; width: 160px; background: var(--table-header); border: 1px solid var(--border-dark); padding: 4px 8px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.customer { margin-left: 5px; line-height: 1.7; }
+.customer strong { font-size: 15px; }
+.customer-contact { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+
+/* Items table */
+.items { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+.items thead tr { background: var(--table-header); }
+.items th { border: 1px solid var(--border-dark); padding: 5px 6px; font-size: 10.5px; text-align: left; }
+.items td { border: 1px solid var(--border); padding: 5px 6px; vertical-align: top; font-size: 11.5px; }
+.items th.ref, .items td.ref { width: 13%; }
+.items th.price, .items td.price { width: 14%; text-align: center; }
+.items th.qty, .items td.qty { width: 7%; text-align: center; }
+.items th.amount, .items td.amount { width: 14%; text-align: right; }
+.items td.center { text-align: center; }
+.items td.right { text-align: right; }
+.item-desc { font-size: 10.5px; color: var(--text-light); margin-top: 3px; }
+
+/* Totals */
+.totals { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.totals table { border-collapse: collapse; min-width: 200px; }
+.totals td { padding: 3px 8px; font-size: 12px; border: 1px solid var(--border); }
+.totals td.right { text-align: right; }
+.totals tr.grand-total td { font-weight: 700; background: var(--table-header); font-size: 13px; border-color: var(--border-dark); }
+
+.spacer { flex: 1; min-height: 6mm; }
+
+/* Text blocks */
+.vat-mention { font-size: 10px; color: var(--text-light); margin-bottom: 6px; font-style: italic; }
+.notes-block { background: var(--primary-light); border-left: 3px solid var(--primary); padding: 6px 8px; font-size: 11px; margin-bottom: 8px; }
+.notes-block strong { display: block; margin-bottom: 2px; }
+
+/* Bank details */
+.bank-details { font-size: 11px; margin-bottom: 8px; }
+.bank-details strong { display: block; margin-bottom: 4px; }
+.bank-info { border-collapse: collapse; width: 100%; }
+.bank-info td { padding: 2px 6px; border: 1px solid var(--border); font-size: 11px; }
+.bank-info td.bank-label { width: 110px; font-weight: 600; background: var(--table-header); }
+
+/* Terms */
+.terms-block { font-size: 10.5px; color: var(--text-light); margin-bottom: 8px; }
+.terms-block strong { display: block; margin-bottom: 3px; color: var(--text); }
+
+/* Footer */
+.doc-footer { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; text-align: center; font-size: 11px; }
+.doc-footer .thanks { font-weight: 600; color: var(--primary); margin-bottom: 3px; }
+.doc-footer .contact { color: var(--text-light); font-size: 10.5px; }
+
+/* Print */
+@media print {
+    body { margin: 0; background: white; }
+    .page { box-shadow: none; margin: 0; }
+}

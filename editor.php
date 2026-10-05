@@ -46,6 +46,8 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
   <span id="topbar-type-badge" class="topbar-doc-type">INVOICE</span>
 
   <a href="index.php" class="btn btn-ghost btn-sm">← History</a>
+  <button class="btn btn-ghost btn-sm" id="btn-export" title="Download document as JSON">⬇ Export JSON</button>
+  <label class="btn btn-ghost btn-sm" id="btn-import-label" title="Load a JSON file into the editor" style="cursor:pointer">⬆ Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
   <button class="btn btn-ghost btn-sm" id="btn-print" title="Print / Save as PDF">🖨 Print</button>
   <button class="btn btn-primary btn-sm" id="btn-save">Save</button>
 </header>
@@ -70,7 +72,12 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
               <option value="QUOTE">Quote</option>
               <option value="CREDIT NOTE">Credit Note</option>
               <option value="OTHER">Other</option>
+              <option value="CUSTOM">Custom…</option>
             </select>
+          </div>
+          <div class="field" id="f-type-custom-wrap" style="display:none">
+            <label>Custom Title</label>
+            <input id="f-type-custom" type="text" placeholder="e.g. DELIVERY NOTE, PROFORMA…">
           </div>
           <div class="field-row col2">
             <div class="field"><label>Number</label><input id="f-number" type="text" placeholder="INV-260805-01"></div>
@@ -301,8 +308,12 @@ document.querySelectorAll('.form-section-header').forEach(hdr => {
 
 // ── Read all form fields → JSON ────────────────────────────
 function collectDoc() {
+  const rawType = v('f-type');
+  const resolvedType = rawType === 'CUSTOM'
+    ? (v('f-type-custom').trim().toUpperCase() || 'CUSTOM')
+    : rawType;
   return {
-    type:          v('f-type'),
+    type:          resolvedType,
     number:        v('f-number'),
     date:          v('f-date'),
     due_date:      v('f-due-date'),
@@ -413,7 +424,17 @@ document.getElementById('btn-add-item').addEventListener('click', () => {
 
 // ── Populate form from JSON ────────────────────────────────
 function populateForm(d) {
-  set('f-type', d.type ?? 'INVOICE');
+  const knownTypes = ['INVOICE', 'QUOTE', 'CREDIT NOTE', 'OTHER'];
+  const docType = (d.type ?? 'INVOICE').toUpperCase();
+  if (knownTypes.includes(docType)) {
+    set('f-type', docType);
+    document.getElementById('f-type-custom-wrap').style.display = 'none';
+    document.getElementById('f-type-custom').value = '';
+  } else {
+    set('f-type', 'CUSTOM');
+    document.getElementById('f-type-custom').value = docType;
+    document.getElementById('f-type-custom-wrap').style.display = 'block';
+  }
   set('f-number', d.number ?? '');
   set('f-date', d.date ?? '');
   set('f-due-date', d.due_date ?? '');
@@ -471,6 +492,17 @@ function set(id, val) {
 }
 
 // ── Currency auto-fill ──────────────────────────────────────
+document.getElementById('f-type').addEventListener('change', function () {
+  const isCustom = this.value === 'CUSTOM';
+  document.getElementById('f-type-custom-wrap').style.display = isCustom ? 'block' : 'none';
+  if (isCustom) {
+    document.getElementById('f-type-custom').focus();
+  }
+  onFormChange();
+});
+
+document.getElementById('f-type-custom').addEventListener('input', onFormChange);
+
 document.getElementById('f-currency').addEventListener('change', function() {
   const sym = CURRENCY_SYMBOLS[this.value] || this.value;
   document.getElementById('f-currency-symbol').value = sym;
@@ -720,6 +752,43 @@ document.getElementById('btn-print').addEventListener('click', async () => {
   }
   if (!currentId) { toast('Please save first', 'error'); return; }
   window.open(`preview.php?id=${currentId}`, '_blank');
+});
+
+// ── Export JSON ─────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click', () => {
+  const d    = collectDoc();
+  const name = [d.type, d.number].filter(Boolean).join('_').replace(/\s+/g, '-') || 'document';
+  const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = name + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('JSON exported', 'success');
+});
+
+// ── Import JSON ─────────────────────────────────────────────
+document.getElementById('btn-import').addEventListener('change', function () {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const d = JSON.parse(e.target.result);
+      if (typeof d !== 'object' || d === null) throw new Error('Invalid JSON structure');
+      populateForm(d);
+      renderPreview(d);
+      isDirty = true;
+      scheduleAutoSave();
+      toast('JSON imported — review and save', 'success');
+    } catch (err) {
+      toast('Import failed: ' + err.message, 'error');
+    }
+    // Reset input so the same file can be re-imported if needed
+    this.value = '';
+  };
+  reader.readAsText(file);
 });
 
 // ── Toast ───────────────────────────────────────────────────

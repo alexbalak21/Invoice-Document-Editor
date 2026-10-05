@@ -396,7 +396,7 @@ function collectItems() {
     reference:   row.querySelector('.item-ref').value,
     unit_price:  parseFloat(row.querySelector('.item-price').value) || 0,
     qty:         parseFloat(row.querySelector('.item-qty').value) || 0,
-    is_free:     row.querySelector('.item-free').checked,
+    is_free:     (row._optRow ? row._optRow.querySelector('.item-free').checked : false),
   }));
 }
 
@@ -430,6 +430,7 @@ function addItemRow(item = {}) {
   `;
   tbody.appendChild(tr);
   tbody.appendChild(trFree);
+  tr._optRow = trFree;  // link so collectItems() can reach the checkbox
 
   // Delete
   tr.querySelector('.btn-del-row').addEventListener('click', () => {

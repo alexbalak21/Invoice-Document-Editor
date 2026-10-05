@@ -6,6 +6,8 @@
   "service_date": "",
   "quote_ref": "",
   "tracking": "",
+  "currency": "EUR",
+  "currency_symbol": "€",
   "issuer": {
     "name": "NOVOCIB SAS",
     "address": "BD de Chatillon, Quai Jean Voisin",
@@ -22,9 +24,16 @@
     "phone": "",
     "vat": ""
   },
-  "currency": "EUR",
-  "currency_symbol": "€",
-  "items": [],
+  "items": [
+    {
+      "name": "Product 1",
+      "description": "Optional Service 1",
+      "reference": "PROSER-01",
+      "unit_price": 100,
+      "qty": 1,
+      "is_free": false
+    }
+  ],
   "vat_rate": 0,
   "amount_paid": 0,
   "show_amount_paid": false,

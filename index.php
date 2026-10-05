@@ -186,10 +186,11 @@ function closeModal() {
 }
 
 async function doDelete() {
+  const idToDelete = pendingDeleteId;
   closeModal();
-  if (!pendingDeleteId) return;
+  if (!idToDelete) return;
   try {
-    const res  = await fetch(`api.php?action=delete&id=${pendingDeleteId}`, { method: 'POST' });
+    const res  = await fetch(`api.php?action=delete&id=${idToDelete}`, { method: 'POST' });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error);
     toast('Document deleted', 'success');

@@ -244,8 +244,8 @@
 </head>
 <body>
 
-<header class="topbar" style="position:relative">
-  <div class="topbar-brand">
+<header class="topbar">
+  <a href="index.php" class="topbar-brand">
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="3" y="2" width="14" height="16" rx="2" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="1.5"/>
       <line x1="6" y1="7" x2="14" y2="7" stroke="white" stroke-width="1.2"/>
@@ -253,13 +253,14 @@
       <line x1="6" y1="13" x2="11" y2="13" stroke="white" stroke-width="1.2"/>
     </svg>
     DocEditor
-  </div>
-  <div class="topbar-center">
-    <span class="topbar-doc-type">Documentation</span>
-  </div>
-  <div style="display:flex;gap:8px;margin-left:auto">
-    <a href="index.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Documents</a>
-  </div>
+  </a>
+  <div class="topbar-divider"></div>
+  <nav class="topbar-nav">
+    <a href="index.php"><i class="fa-solid fa-file-lines"></i> Documents</a>
+    <a href="customers.php"><i class="fa-solid fa-users"></i> Customers</a>
+    <a href="documentation.php" class="active"><i class="fa-solid fa-book-open"></i> Docs</a>
+  </nav>
+  <div class="topbar-actions"></div>
 </header>
 
 <div class="doc-wrap">

@@ -33,7 +33,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
 
 <!-- ── Top bar ── -->
 <header class="topbar">
-  <div class="topbar-brand">
+  <a href="index.php" class="topbar-brand">
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="3" y="2" width="14" height="16" rx="2" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="1.5"/>
       <line x1="6" y1="7" x2="14" y2="7" stroke="white" stroke-width="1.2"/>
@@ -41,20 +41,26 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <line x1="6" y1="13" x2="11" y2="13" stroke="white" stroke-width="1.2"/>
     </svg>
     DocEditor
-    <span id="topbar-docnum"></span>
-  </div>
+  </a>
+  <div class="topbar-divider"></div>
+  <nav class="topbar-nav">
+    <a href="index.php"><i class="fa-solid fa-file-lines"></i> Documents</a>
+    <a href="customers.php"><i class="fa-solid fa-users"></i> Customers</a>
+    <a href="documentation.php"><i class="fa-solid fa-book-open"></i> Docs</a>
+  </nav>
 
   <div class="topbar-center">
     <span id="topbar-type-badge" class="topbar-doc-type">INVOICE</span>
     <span id="topbar-docnum-center"></span>
   </div>
 
-  <a href="index.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> History</a>
-  <button class="btn btn-ghost btn-sm" id="btn-export" title="Download current document as JSON"><i class="fa-solid fa-download"></i> Export JSON</button>
-  <button class="btn btn-ghost btn-sm" id="btn-model" title="Download a fully annotated JSON model to give to an AI"><i class="fa-solid fa-cube"></i> Model JSON</button>
-  <label class="btn btn-ghost btn-sm" id="btn-import-label" title="Load a JSON file into the editor" style="cursor:pointer"><i class="fa-solid fa-upload"></i> Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
-  <button class="btn btn-ghost btn-sm" id="btn-print" title="Print / Save as PDF"><i class="fa-solid fa-print"></i> Print</button>
-  <button class="btn btn-primary btn-sm" id="btn-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" id="btn-export" title="Download current document as JSON"><i class="fa-solid fa-download"></i> Export</button>
+    <button class="btn btn-ghost btn-sm" id="btn-model" title="Download a fully annotated JSON model to give to an AI"><i class="fa-solid fa-cube"></i> Model</button>
+    <label class="btn btn-ghost btn-sm" id="btn-import-label" title="Load a JSON file into the editor" style="cursor:pointer"><i class="fa-solid fa-upload"></i> Import<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
+    <button class="btn btn-ghost btn-sm" id="btn-print" title="Print / Save as PDF"><i class="fa-solid fa-print"></i> Print</button>
+    <button class="btn btn-primary btn-sm" id="btn-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+  </div>
 </header>
 
 <!-- ── Body ── -->

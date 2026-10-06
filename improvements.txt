@@ -4,4 +4,4 @@ Implement MySQL connection
 Implement secure login method
 Implement 2F auth with email
 Implement MySQL encryption.
- Implement a color theme for Invoice / Quotes
+Implement a color theme for Invoice / Quotes

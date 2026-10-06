@@ -293,6 +293,7 @@
     <hr>
     <a href="#json">JSON import / export</a>
     <a href="#json-doc" class="sub">Document JSON</a>
+    <a href="#json-model" class="sub">Model JSON (AI template)</a>
     <a href="#json-customers" class="sub">Customer JSON</a>
     <a href="#json-ai" class="sub">AI workflow</a>
     <hr>
@@ -529,7 +530,8 @@
       <h3 id="json-doc">Document JSON</h3>
       <p>In the editor topbar:</p>
       <ul>
-        <li><span class="act"><i class="fa-solid fa-download"></i> Export JSON</span> — downloads the current form state as a <code>.json</code> file. The file is named from the document type and number, e.g. <code>INVOICE_INV-260901-01.json</code>. The logo is stripped to keep the file small and AI-friendly.</li>
+        <li><span class="act"><i class="fa-solid fa-download"></i> Export JSON</span> — downloads the current form state as a <code>.json</code> file named after the document type and number, e.g. <code>INVOICE_INV-260901-01.json</code>. The logo is stripped automatically to keep the file small and AI-friendly.</li>
+        <li><span class="act"><i class="fa-solid fa-cube"></i> Model JSON</span> — downloads <code>model.json</code>, a fully annotated template designed to be given to an AI. Every field carries a <code>_note</code> explaining what it does and a <code>_value</code> with a realistic example. See <a href="#json-model">Model JSON</a> below.</li>
         <li><span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> — opens a file picker. Selecting a valid <code>.json</code> file fills every form field, updates the live preview, and schedules an auto-save. Review the result, then click <span class="act primary">Save</span>.</li>
       </ul>
       <p>The full JSON structure for a document looks like this (the same format exported by the <span class="act">⬇ Export JSON</span> button):</p>
@@ -587,6 +589,134 @@
   "footer_contact": "If you have any questions, please contact us.\n• contact@novocib.com"
 }</code></pre>
 
+
+      <h3 id="json-model">Model JSON &mdash; AI annotation template</h3>
+      <p>
+        The <span class="act"><i class="fa-solid fa-cube"></i> Model JSON</span> button in the editor topbar downloads a special file: <code>model.json</code>.
+        Unlike <strong>Export JSON</strong> (which captures the live form state), the Model is a <strong>static, fully-annotated reference</strong>
+        built specifically to be given to an AI assistant like ChatGPT, Copilot, or Claude.
+      </p>
+      <p>Its purpose: give the AI a complete map of every field &mdash; what it does, what values are valid, and a realistic example &mdash;
+        so it can generate a correctly-structured invoice JSON from a plain-language description.
+      </p>
+
+      <h3>Model file format</h3>
+      <p>Most scalar fields are wrapped in a <code>{ "_note": "...", "_value": ... }</code> object:</p>
+      <table class="ref-table">
+        <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>_note</code></td><td>Human / AI explanation of the field. Never appears on the printed document.</td></tr>
+          <tr><td><code>_value</code></td><td>The actual value the AI should fill in and that the editor reads on import.</td></tr>
+          <tr><td><code>_instructions</code></td><td>Top-level array that tells the AI how to use the model file.</td></tr>
+          <tr><td><code>_ai_prompt_suggestions</code></td><td>Ready-to-use example prompts you can copy-paste to your AI assistant.</td></tr>
+        </tbody>
+      </table>
+      <p>Compound objects (<code>issuer</code>, <code>customer</code>, <code>bank</code>) carry a top-level <code>_note</code> key
+        alongside their regular sub-fields rather than wrapping everything in <code>_value</code>.
+        The <code>items</code> array is wrapped in <code>_value</code> with three realistic example rows.
+      </p>
+
+      <div class="tip"><strong>Import handles both formats automatically.</strong>
+        <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> detects whether a file is a plain document JSON or an annotated Model JSON.
+        For Model files it strips all <code>_note</code>, <code>_instructions</code>, and <code>_ai_prompt_suggestions</code> keys
+        and unwraps all <code>_value</code> wrappers before filling the form &mdash;
+        you can import the AI-generated file directly without any manual cleanup.
+      </div>
+
+      <pre><code>{
+  "_instructions": [
+    "This is a reference model for DocEditor. Fill the fields and import into the editor.",
+    "Fields marked _note are for understanding only — remove them before importing.",
+    "All fields are optional except 'type'. Unknown keys are ignored on import.",
+    "To import: editor → ⬆ Import JSON → select your filled file."
+  ],
+
+  "type":   { "_note": "INVOICE | QUOTE | CREDIT NOTE | OTHER | any custom string e.g. PROFORMA", "_value": "INVOICE" },
+  "number": { "_note": "Reference number. Suggested format: INV-YYYYMMDD-N.", "_value": "INV-20261006-1" },
+  "date":   { "_note": "Document date, ISO format YYYY-MM-DD.", "_value": "2026-10-06" },
+  "due_date":     { "_note": "Payment due date. Leave empty if not applicable.", "_value": "" },
+  "service_date": { "_note": "Date service was performed. Leave empty if not applicable.", "_value": "" },
+  "quote_ref":    { "_note": "Related quote number. Leave empty if not applicable.", "_value": "" },
+  "tracking":     { "_note": "Shipment tracking number. Leave empty if not applicable.", "_value": "" },
+  "currency":        { "_note": "ISO code: EUR | USD | GBP | CHF or any other.", "_value": "EUR" },
+  "currency_symbol": { "_note": "Symbol next to amounts. Auto-set from currency.", "_value": "€" },
+
+  "issuer": {
+    "_note":   "Your company details — shown in the document header.",
+    "name":    "NOVOCIB SAS",
+    "address": "BD de Chatillon, Quai Jean Voisin",
+    "city":    "62200 Boulogne-sur-Mer — France",
+    "email":   "contact@novocib.com",
+    "legal":   "SAS, société par actions simplifiée — Share capital: 260 158,00 €"
+  },
+
+  "customer": {
+    "_note":   "The client / bill-to details.",
+    "name":    "Pureture Co.",
+    "address": "4F, 2121-3 Nambusunhwan-ro",
+    "city":    "06725 Seocho-gu, Seoul — Republic of Korea",
+    "contact": "Sohee Yoon",
+    "phone":   "+82-10-6681-1162",
+    "vat":     ""
+  },
+
+  "items": {
+    "_note": "Array of line items. is_free=true marks a complimentary item (shown as 'offert', excluded from subtotal).",
+    "_value": [
+      { "name": "HPLC-UV Analysis — Kinetics Study", "description": "3 concentrations, triplicate",
+        "reference": "S1200-03-NA", "unit_price": 300, "qty": 2, "is_free": false },
+      { "name": "Sample Preparation", "description": "Weighing and dissolution",
+        "reference": "S0010-01", "unit_price": 80, "qty": 1, "is_free": false },
+      { "name": "Complimentary Consultation", "description": "Protocol review — offered as a courtesy",
+        "reference": "", "unit_price": 150, "qty": 1, "is_free": true }
+    ]
+  },
+
+  "vat_rate":    { "_note": "VAT % on subtotal. 0 for tax-exempt / export.", "_value": 0 },
+  "vat_mention": { "_note": "Italic line below totals, e.g. VAT exemption reason.", "_value": "VAT not applicable — export outside the EU (art. 259-1 CGI)" },
+  "show_amount_paid": { "_note": "true = show Amount Paid row and balance.", "_value": false },
+  "amount_paid":      { "_note": "Amount already received. Used only when show_amount_paid is true.", "_value": 0 },
+  "balance_label":    { "_note": "Grand total row label.", "_value": "TOTAL DUE" },
+  "notes": { "_note": "Free-text block below VAT mention. Use \\n for line breaks.", "_value": "" },
+  "terms": { "_note": "Terms & conditions block below bank details.", "_value": "PAYMENT IMMEDIATE UPON RECEIPT..." },
+
+  "bank": {
+    "_note":        "Bank details. preset: EUR | USD | CUSTOM",
+    "preset":       "EUR",
+    "label":        "Bank Details EUR - Banque Populaire, France",
+    "beneficiary":  "SAS NOVOCIB",
+    "bank_name":    "BANQUE POPULAIRE AUVERGNE RHÔNE ALPES (BPAURA)",
+    "bank_address": "215 Avenue Jean Jaurès, 69007 Lyon, France",
+    "iban":         "FR76 1680 7004 0081 0876 0421 151",
+    "bic":          "CCBPFRPPGRE"
+  },
+
+  "footer_thanks":  { "_note": "Centred thank-you line in the footer.", "_value": "Thank you for your business!" },
+  "footer_contact": { "_note": "Small contact line(s). Use \\n for multiple lines.", "_value": "If you have any questions, please contact us.\n• contact@novocib.com" },
+
+  "_ai_prompt_suggestions": [
+    "Fill this model for customer [NAME] with the following services: ...",
+    "Change the type to QUOTE and remove the bank details section.",
+    "Add 3 line items for HPLC analysis at €300 each, VAT not applicable, due immediately.",
+    "Use the USD bank account and set currency to USD.",
+    "Mark as partially paid: amount_paid = 500, show_amount_paid = true.",
+    "Set type to PROFORMA and add a tracking number."
+  ]
+}</code></pre>
+
+      <h3>AI workflow with Model JSON &mdash; step by step</h3>
+      <ol class="steps">
+        <li>Open any document in the editor (a new blank one works best for a fresh invoice).</li>
+        <li>Click <span class="act"><i class="fa-solid fa-cube"></i> Model JSON</span> in the topbar. This downloads <code>model.json</code> — a fully annotated template with field descriptions and example NOVOCIB data.</li>
+        <li>Open your AI assistant (Claude, ChatGPT, Copilot…). Attach <code>model.json</code> and describe what you need, for example:<br>
+            <em>"Fill this invoice for Pureture (Seoul) — 2 HPLC analyses at €300 each and 1 sample prep at €80, VAT not applicable (export), due immediately, EUR bank account."</em><br>
+            You can also copy-paste one of the prompt suggestions from the <code>_ai_prompt_suggestions</code> array at the bottom of the file.</li>
+        <li>The AI reads the <code>_note</code> annotations and returns a correctly structured JSON. Save it as a <code>.json</code> file.</li>
+        <li>Back in the editor, click <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> and select the AI-generated file. The editor automatically strips <code>_note</code> keys and unwraps <code>_value</code> wrappers, then fills every field.</li>
+        <li>Review the preview panel. Correct anything if needed, then click <span class="act primary">Save</span> and <span class="act"><i class="fa-solid fa-print"></i> Print</span>.</li>
+      </ol>
+      <div class="note"><strong>Model JSON vs Export JSON:</strong> Export gives the AI a document with real or empty values but no explanations — the AI has to guess what each field means. Model JSON gives the AI a complete field reference with valid values and constraints baked in. Use Model for new documents, Export when you want the AI to modify an existing one.</div>
+
       <h3 id="json-customers">Customer JSON</h3>
       <p>On the Customers page, <span class="act"><i class="fa-solid fa-download"></i> Export JSON</span> downloads all customer records as a clean array (internal IDs and timestamps are stripped). <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> reads the array and saves each entry — entries missing a <code>name</code> are skipped. The toast message tells you how many were imported and how many were skipped.</p>
       <pre><code>[
@@ -600,17 +730,17 @@
   }
 ]</code></pre>
 
-      <h3 id="json-ai">AI workflow — step by step</h3>
-      <p>The fastest way to create a filled invoice with an AI assistant:</p>
-      <ol class="steps">
-        <li>Open a <strong>new Invoice</strong> from the Documents page. The form loads with your default issuer details.</li>
-        <li>Click <span class="act"><i class="fa-solid fa-download"></i> Export JSON</span>. This downloads the current form as a JSON template with all the field names and default values already set.</li>
-        <li>Open your AI assistant (Claude, ChatGPT, etc.). Attach or paste the JSON file and give it a prompt like: <em>"Fill this invoice for customer Pureture — 2 units of HPLC-UV Analysis at €300 each, VAT not applicable, use the USD bank account, due immediately."</em></li>
-        <li>The AI returns a completed JSON. Save it as a <code>.json</code> file.</li>
-        <li>Back in the editor, click <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> and select the file. The form fills instantly and the preview updates.</li>
-        <li>Review the document in the preview panel. Make any corrections, then click <span class="act primary">Save</span> and <span class="act"><i class="fa-solid fa-print"></i> Print</span>.</li>
-      </ol>
-      <div class="tip"><strong>Tip:</strong> Exporting on a blank new document gives the cleanest template — the logo is stripped automatically, so the file stays small and the AI doesn't have to deal with a base64 blob.</div>
+      <h3 id="json-ai">AI workflow &mdash; quick reference</h3>
+      <p>Three buttons, two JSON formats, one workflow:</p>
+      <table class="ref-table">
+        <thead><tr><th>Button</th><th>File</th><th>Best used for</th></tr></thead>
+        <tbody>
+          <tr><td><span class="act"><i class="fa-solid fa-cube"></i> Model JSON</span></td><td><code>model.json</code></td><td>Starting a new document from scratch &mdash; gives the AI annotated field descriptions.</td></tr>
+          <tr><td><span class="act"><i class="fa-solid fa-download"></i> Export JSON</span></td><td><code>TYPE_number.json</code></td><td>Modifying or completing an existing document &mdash; gives the AI the real current values.</td></tr>
+          <tr><td><span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span></td><td>any <code>.json</code></td><td>Loading a file back into the editor &mdash; works with both formats above.</td></tr>
+        </tbody>
+      </table>
+      <div class="tip"><strong>Full step-by-step:</strong> See the <a href="#json-model">Model JSON &mdash; AI workflow</a> section above for a detailed walkthrough with example prompts.</div>
     </div>
 
     <!-- File structure -->

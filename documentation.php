@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Documentation — DocEditor</title>
   <link rel="stylesheet" href="assets/editor.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <style>
     html, body { height: auto; overflow: auto; background: #f0f2f5; }
 
@@ -257,7 +258,7 @@
     <span class="topbar-doc-type">Documentation</span>
   </div>
   <div style="display:flex;gap:8px;margin-left:auto">
-    <a href="index.php" class="btn btn-ghost btn-sm">← Documents</a>
+    <a href="index.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Documents</a>
   </div>
 </header>
 
@@ -302,29 +303,29 @@
 
     <!-- Hero -->
     <div class="doc-hero">
-      <h1>📄 DocEditor — User Guide</h1>
+      <h1><i class="fa-regular fa-file-lines"></i> DocEditor — User Guide</h1>
       <p>A self-hosted PHP application for creating professional invoices, quotes, and custom documents with a live preview, a customer address book, and JSON import/export for AI-assisted filling.</p>
     </div>
 
     <!-- Quick links -->
     <div class="quick-links">
       <a class="ql-card" href="#editor">
-        <div class="ql-icon">✏️</div>
+        <div class="ql-icon"><i class="fa-solid fa-pen-to-square"></i></div>
         <div class="ql-title">Creating a document</div>
         <div class="ql-desc">Fill the form, watch the live preview, save and print</div>
       </a>
       <a class="ql-card" href="#customers">
-        <div class="ql-icon">👥</div>
+        <div class="ql-icon"><i class="fa-solid fa-users"></i></div>
         <div class="ql-title">Customers</div>
         <div class="ql-desc">Pick from your address book or let it save automatically</div>
       </a>
       <a class="ql-card" href="#json">
-        <div class="ql-icon">{ }</div>
+        <div class="ql-icon"><i class="fa-solid fa-code"></i></div>
         <div class="ql-title">JSON / AI workflow</div>
         <div class="ql-desc">Export a template, let AI fill it, import back</div>
       </a>
       <a class="ql-card" href="#files">
-        <div class="ql-icon">📁</div>
+        <div class="ql-icon"><i class="fa-solid fa-folder-open"></i></div>
         <div class="ql-title">File structure</div>
         <div class="ql-desc">What every file does and where the database lives</div>
       </a>
@@ -332,7 +333,7 @@
 
     <!-- Overview -->
     <div class="doc-section" id="overview">
-      <h2><span class="sec-icon">🗺</span> Overview</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-map"></i></span> Overview</h2>
       <p>DocEditor runs entirely in PHP with a SQLite database — no external services, no internet connection needed. All data lives in a single file: <code>db/documents.sqlite</code>.</p>
       <p>The app has three pages:</p>
       <table class="ref-table">
@@ -348,7 +349,7 @@
 
     <!-- Getting started -->
     <div class="doc-section" id="getting-started">
-      <h2><span class="sec-icon">🚀</span> Getting started</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-rocket"></i></span> Getting started</h2>
       <ol class="steps">
         <li>Drop the project folder on any PHP server (Apache, Nginx, or <code>php -S localhost:8000</code>). PHP 8.0+ and the <code>pdo_sqlite</code> extension are required.</li>
         <li>Open <code>index.php</code> in your browser. The <code>db/</code> folder and <code>documents.sqlite</code> are created automatically on the first request.</li>
@@ -359,7 +360,7 @@
 
     <!-- Documents page -->
     <div class="doc-section" id="documents">
-      <h2><span class="sec-icon">📋</span> Documents page</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-list"></i></span> Documents page</h2>
       <p><code>index.php</code> is the home screen. It shows all your documents in a table, newest first.</p>
 
       <h3 id="doc-actions">Row actions</h3>
@@ -379,7 +380,7 @@
 
     <!-- Editor -->
     <div class="doc-section" id="editor">
-      <h2><span class="sec-icon">✏️</span> The Editor</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-pen-to-square"></i></span> The Editor</h2>
       <p>The editor is a two-panel layout. The <strong>form panel</strong> (left) contains collapsible sections for every field. The <strong>preview panel</strong> (right) renders a pixel-accurate A4 document that updates as you type — no submit button needed.</p>
       <p>The document type and number are displayed in large text in the centre of the topbar so you always know which document you're editing.</p>
 
@@ -413,7 +414,7 @@
 
       <h3 id="bill-to">Bill To</h3>
       <p>Fill in the customer's company name, address, city/country, contact person, phone and VAT number. These appear in the "Bill To" block on the printed document.</p>
-      <p>Use the <span class="act">📋 Pick customer</span> button to search your address book instead of typing — see the <a href="#customers">Customers</a> section for details.</p>
+      <p>Use the <span class="act"><i class="fa-solid fa-address-book"></i> Pick customer</span> button to search your address book instead of typing — see the <a href="#customers">Customers</a> section for details.</p>
 
       <h3 id="line-items">Line items</h3>
       <p>Click <span class="act primary">+ Add line</span> to add a product or service row. Each row has:</p>
@@ -428,7 +429,7 @@
           <tr><td>Free / "offert"</td><td>Tick to mark the line as complimentary. Unit price and amount show as <em>offert</em> and are excluded from the subtotal.</td></tr>
         </tbody>
       </table>
-      <p>Click <strong>✕</strong> on any row to remove it. Subtotal, VAT and total recalculate instantly.</p>
+      <p>Click the <strong><i class="fa-solid fa-xmark"></i></strong> button on any row to remove it. Subtotal, VAT and total recalculate instantly.</p>
 
       <h3 id="totals">Totals & VAT</h3>
       <table class="ref-table">
@@ -484,19 +485,19 @@
       <ol class="steps">
         <li><strong>Auto-save</strong> triggers 8 seconds after your last change. The status dot in the bottom-left of the form panel shows the state: grey = unsaved, green = saved, red = error.</li>
         <li>Click <span class="act primary">Save</span> in the topbar to save immediately without waiting.</li>
-        <li>Click <span class="act">🖨 Print</span> to save (if needed) and open the clean A4 view in a new tab. In the browser print dialog, set margins to <em>None</em> and enable <em>Background graphics</em>, then save as PDF.</li>
+        <li>Click <span class="act"><i class="fa-solid fa-print"></i> Print</span> to save (if needed) and open the clean A4 view in a new tab. In the browser print dialog, set margins to <em>None</em> and enable <em>Background graphics</em>, then save as PDF.</li>
       </ol>
       <div class="tip"><strong>Tip:</strong> The URL updates to <code>editor.php?id=X</code> the first time a document is saved. Bookmark it to return directly to the document.</div>
     </div>
 
     <!-- Customers -->
     <div class="doc-section" id="customers">
-      <h2><span class="sec-icon">👥</span> Customers</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-users"></i></span> Customers</h2>
       <p>The customer address book stores: company name, address, city/country, contact person, phone, and VAT number. Records are shared across all documents.</p>
 
       <h3 id="cust-picker">Picking a customer in the editor</h3>
       <ol class="steps">
-        <li>In the <strong>Bill To</strong> section header, click <span class="act">📋 Pick customer</span>.</li>
+        <li>In the <strong>Bill To</strong> section header, click <span class="act"><i class="fa-solid fa-address-book"></i> Pick customer</span>.</li>
         <li>A modal opens with a live search box. Start typing a name, city, or contact name — results filter as you type.</li>
         <li>Click any row to fill all Bill To fields instantly. The modal closes and the preview updates.</li>
       </ol>
@@ -508,27 +509,27 @@
       <div class="warn"><strong>Note:</strong> If you edit a customer's address on one document and save it, the address book record for that name is updated to the new values. The change does <em>not</em> retroactively alter the stored data in older documents.</div>
 
       <h3 id="cust-manage">Managing customers</h3>
-      <p>Go to <strong>👥 Customers</strong> from the Documents topbar. You can:</p>
+      <p>Go to <strong><i class="fa-solid fa-users"></i> Customers</strong> from the Documents topbar. You can:</p>
       <ul>
         <li>Search across all records by name, city, or contact</li>
         <li>Add a new customer with <span class="act primary">+ New Customer</span></li>
         <li>Edit any record — click <span class="act">Edit</span> to open an inline form at the top of the page</li>
         <li>Delete a record with <span class="act danger">Delete</span> and a confirmation prompt (does not affect existing documents)</li>
-        <li>Export all customers to a JSON file with <span class="act">⬇ Export JSON</span></li>
-        <li>Import customers from a JSON file with <span class="act">⬆ Import JSON</span></li>
+        <li>Export all customers to a JSON file with <span class="act"><i class="fa-solid fa-download"></i> Export JSON</span></li>
+        <li>Import customers from a JSON file with <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span></li>
       </ul>
     </div>
 
     <!-- JSON -->
     <div class="doc-section" id="json">
-      <h2><span class="sec-icon">{ }</span> JSON Import / Export</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-code"></i></span> JSON Import / Export</h2>
       <p>Both the editor and the customers page can read and write JSON. This makes it easy to back up data, migrate records, or use an AI assistant to fill in documents.</p>
 
       <h3 id="json-doc">Document JSON</h3>
       <p>In the editor topbar:</p>
       <ul>
-        <li><span class="act">⬇ Export JSON</span> — downloads the current form state as a <code>.json</code> file. The file is named from the document type and number, e.g. <code>INVOICE_INV-260901-01.json</code>. The logo is stripped to keep the file small and AI-friendly.</li>
-        <li><span class="act">⬆ Import JSON</span> — opens a file picker. Selecting a valid <code>.json</code> file fills every form field, updates the live preview, and schedules an auto-save. Review the result, then click <span class="act primary">Save</span>.</li>
+        <li><span class="act"><i class="fa-solid fa-download"></i> Export JSON</span> — downloads the current form state as a <code>.json</code> file. The file is named from the document type and number, e.g. <code>INVOICE_INV-260901-01.json</code>. The logo is stripped to keep the file small and AI-friendly.</li>
+        <li><span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> — opens a file picker. Selecting a valid <code>.json</code> file fills every form field, updates the live preview, and schedules an auto-save. Review the result, then click <span class="act primary">Save</span>.</li>
       </ul>
       <p>The full JSON structure for a document looks like this (the same format exported by the <span class="act">⬇ Export JSON</span> button):</p>
       <pre><code>{
@@ -586,7 +587,7 @@
 }</code></pre>
 
       <h3 id="json-customers">Customer JSON</h3>
-      <p>On the Customers page, <span class="act">⬇ Export JSON</span> downloads all customer records as a clean array (internal IDs and timestamps are stripped). <span class="act">⬆ Import JSON</span> reads the array and saves each entry — entries missing a <code>name</code> are skipped. The toast message tells you how many were imported and how many were skipped.</p>
+      <p>On the Customers page, <span class="act"><i class="fa-solid fa-download"></i> Export JSON</span> downloads all customer records as a clean array (internal IDs and timestamps are stripped). <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> reads the array and saves each entry — entries missing a <code>name</code> are skipped. The toast message tells you how many were imported and how many were skipped.</p>
       <pre><code>[
   {
     "name": "Pureture",
@@ -602,18 +603,18 @@
       <p>The fastest way to create a filled invoice with an AI assistant:</p>
       <ol class="steps">
         <li>Open a <strong>new Invoice</strong> from the Documents page. The form loads with your default issuer details.</li>
-        <li>Click <span class="act">⬇ Export JSON</span>. This downloads the current form as a JSON template with all the field names and default values already set.</li>
+        <li>Click <span class="act"><i class="fa-solid fa-download"></i> Export JSON</span>. This downloads the current form as a JSON template with all the field names and default values already set.</li>
         <li>Open your AI assistant (Claude, ChatGPT, etc.). Attach or paste the JSON file and give it a prompt like: <em>"Fill this invoice for customer Pureture — 2 units of HPLC-UV Analysis at €300 each, VAT not applicable, use the USD bank account, due immediately."</em></li>
         <li>The AI returns a completed JSON. Save it as a <code>.json</code> file.</li>
-        <li>Back in the editor, click <span class="act">⬆ Import JSON</span> and select the file. The form fills instantly and the preview updates.</li>
-        <li>Review the document in the preview panel. Make any corrections, then click <span class="act primary">Save</span> and <span class="act">🖨 Print</span>.</li>
+        <li>Back in the editor, click <span class="act"><i class="fa-solid fa-upload"></i> Import JSON</span> and select the file. The form fills instantly and the preview updates.</li>
+        <li>Review the document in the preview panel. Make any corrections, then click <span class="act primary">Save</span> and <span class="act"><i class="fa-solid fa-print"></i> Print</span>.</li>
       </ol>
       <div class="tip"><strong>Tip:</strong> Exporting on a blank new document gives the cleanest template — the logo is stripped automatically, so the file stays small and the AI doesn't have to deal with a base64 blob.</div>
     </div>
 
     <!-- File structure -->
     <div class="doc-section" id="files">
-      <h2><span class="sec-icon">📁</span> File structure</h2>
+      <h2><span class="sec-icon"><i class="fa-solid fa-folder-open"></i></span> File structure</h2>
       <div class="file-tree">
         <div><span class="dir">project/</span></div>
         <div>&nbsp;&nbsp;├── <span class="file">index.php</span> &nbsp;<span class="note">— Document history & management</span></div>

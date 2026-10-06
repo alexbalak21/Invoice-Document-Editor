@@ -27,6 +27,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
   <title><?= htmlspecialchars($pageTitle) ?> — Invoice Editor</title>
   <link rel="stylesheet" href="assets/editor.css">
   <link rel="stylesheet" href="assets/document.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
 
@@ -48,11 +49,11 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
     <span id="topbar-docnum-center"></span>
   </div>
 
-  <a href="index.php" class="btn btn-ghost btn-sm">← History</a>
-  <button class="btn btn-ghost btn-sm" id="btn-export" title="Download document as JSON">⬇ Export JSON</button>
-  <label class="btn btn-ghost btn-sm" id="btn-import-label" title="Load a JSON file into the editor" style="cursor:pointer">⬆ Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
-  <button class="btn btn-ghost btn-sm" id="btn-print" title="Print / Save as PDF">🖨 Print</button>
-  <button class="btn btn-primary btn-sm" id="btn-save">Save</button>
+  <a href="index.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> History</a>
+  <button class="btn btn-ghost btn-sm" id="btn-export" title="Download document as JSON"><i class="fa-solid fa-download"></i> Export JSON</button>
+  <label class="btn btn-ghost btn-sm" id="btn-import-label" title="Load a JSON file into the editor" style="cursor:pointer"><i class="fa-solid fa-upload"></i> Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
+  <button class="btn btn-ghost btn-sm" id="btn-print" title="Print / Save as PDF"><i class="fa-solid fa-print"></i> Print</button>
+  <button class="btn btn-primary btn-sm" id="btn-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 </header>
 
 <!-- ── Body ── -->
@@ -65,7 +66,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Document Header -->
       <div class="form-section">
         <div class="form-section-header open" data-section="header">
-          Document Header <span class="chevron">▼</span>
+          Document Header <i class="fa-solid fa-chevron-down chevron"></i>
         </div>
         <div class="form-section-body open" id="sec-header">
           <div class="field">
@@ -111,8 +112,8 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Bill To -->
       <div class="form-section">
         <div class="form-section-header open" data-section="customer" style="justify-content:space-between">
-          <span>Bill To <span class="chevron">▼</span></span>
-          <button type="button" id="btn-pick-customer" class="btn-pick-customer" title="Search existing customers" onclick="event.stopPropagation();openCustomerPicker()">📋 Pick customer</button>
+          <span>Bill To <i class="fa-solid fa-chevron-down chevron"></i></span>
+          <button type="button" id="btn-pick-customer" class="btn-pick-customer" title="Search existing customers" onclick="event.stopPropagation();openCustomerPicker()"><i class="fa-solid fa-address-book"></i> Pick customer</button>
         </div>
         <div class="form-section-body open" id="sec-customer">
           <div class="field"><label>Company / Customer Name</label><input id="f-cust-name" type="text" placeholder="Pureture"></div>
@@ -129,7 +130,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Line Items -->
       <div class="form-section">
         <div class="form-section-header open" data-section="items">
-          Line Items <span class="chevron">▼</span>
+          Line Items <i class="fa-solid fa-chevron-down chevron"></i>
         </div>
         <div class="form-section-body open" id="sec-items">
           <table class="items-form-table">
@@ -151,7 +152,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Totals -->
       <div class="form-section">
         <div class="form-section-header" data-section="totals">
-          Totals &amp; VAT <span class="chevron">▼</span>
+          Totals &amp; VAT <i class="fa-solid fa-chevron-down chevron"></i>
         </div>
         <div class="form-section-body" id="sec-totals">
           <div class="field-row col2">
@@ -168,7 +169,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Text Blocks -->
       <div class="form-section">
         <div class="form-section-header" data-section="text">
-          Notes &amp; Terms <span class="chevron">▼</span>
+          Notes &amp; Terms <i class="fa-solid fa-chevron-down chevron"></i>
         </div>
         <div class="form-section-body" id="sec-text">
           <div class="field"><label>VAT Mention (italic line)</label><textarea id="f-vat-mention" rows="2" placeholder="VAT not applicable - export outside the EU..."></textarea></div>
@@ -182,7 +183,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Bank Details -->
       <div class="form-section">
         <div class="form-section-header" data-section="bank">
-          Bank Details <span class="chevron">▼</span>
+          Bank Details <i class="fa-solid fa-chevron-down chevron"></i>
         </div>
         <div class="form-section-body" id="sec-bank">
           <div class="field">
@@ -205,7 +206,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <!-- Section: Issuer -->
       <div class="form-section">
         <div class="form-section-header" data-section="issuer">
-          Issuer (Your Company) <span class="chevron">▼</span>
+          Issuer (Your Company) <i class="fa-solid fa-chevron-down chevron"></i>
         </div>
         <div class="form-section-body" id="sec-issuer">
           <div class="field"><label>Company Name</label><input id="f-issuer-name" type="text" placeholder="NOVOCIB SAS"></div>
@@ -239,7 +240,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
   <div class="cust-modal">
     <div class="cust-modal-header">
       <h3>Pick a Customer</h3>
-      <button class="cust-modal-close" onclick="closeCustomerPicker()">✕</button>
+      <button class="cust-modal-close" onclick="closeCustomerPicker()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="cust-modal-search">
       <input type="text" id="cust-search" placeholder="Search by name, city, contact…" oninput="searchCustomers(this.value)" autocomplete="off">
@@ -248,7 +249,7 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
       <div class="cust-empty">Loading…</div>
     </div>
     <div class="cust-modal-footer">
-      <a href="customers.php" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none">⚙ Manage customers</a>
+      <a href="customers.php" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none"><i class="fa-solid fa-gear"></i> Manage customers</a>
     </div>
   </div>
 </div>
@@ -415,7 +416,7 @@ function addItemRow(item = {}) {
     <td><input class="item-ref" type="text" placeholder="REF" value="${esc(item.reference ?? '')}"></td>
     <td><input class="item-price" type="number" min="0" step="0.01" placeholder="0.00" value="${esc(String(item.unit_price ?? ''))}"></td>
     <td><input class="item-qty" type="number" min="0" step="1" value="${esc(String(item.qty ?? 1))}"></td>
-    <td class="td-del"><button class="btn-del-row" title="Remove">✕</button></td>
+    <td class="td-del"><button class="btn-del-row" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>
   `;
   // Free toggle row
   const trFree = document.createElement('tr');
@@ -935,4 +936,4 @@ init();
 </script>
 
 </body>
-</html>
+</html> 

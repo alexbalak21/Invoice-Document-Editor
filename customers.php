@@ -10,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Customers — Invoice Editor</title>
   <link rel="stylesheet" href="assets/editor.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <style>
     html, body { height: auto; overflow: auto; background: #f0f2f5; }
   </style>
@@ -27,10 +28,10 @@
     DocEditor
   </div>
   <div style="display:flex;gap:8px;margin-left:auto">
-    <a href="index.php" class="btn btn-ghost btn-sm">← Documents</a>
-    <button class="btn btn-ghost btn-sm" id="btn-export" title="Download all customers as JSON">⬇ Export JSON</button>
-    <label class="btn btn-ghost btn-sm" title="Import customers from a JSON file" style="cursor:pointer">⬆ Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
-    <button class="btn btn-primary btn-sm" onclick="openForm()">+ New Customer</button>
+    <a href="index.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Documents</a>
+    <button class="btn btn-ghost btn-sm" id="btn-export" title="Download all customers as JSON"><i class="fa-solid fa-download"></i> Export JSON</button>
+    <label class="btn btn-ghost btn-sm" title="Import customers from a JSON file" style="cursor:pointer"><i class="fa-solid fa-upload"></i> Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
+    <button class="btn btn-primary btn-sm" onclick="openForm()"><i class="fa-solid fa-plus"></i> New Customer</button>
   </div>
 </header>
 
@@ -82,7 +83,7 @@
   <!-- Customer table -->
   <div id="cust-list">
     <div class="empty-state">
-      <div class="empty-icon">👥</div>
+      <div class="empty-icon"><i class="fa-solid fa-users"></i></div>
       <h2>Loading…</h2>
     </div>
   </div>
@@ -115,7 +116,7 @@ async function loadCustomers() {
     renderList(json.customers);
   } catch(e) {
     document.getElementById('cust-list').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">⚠️</div><h2>Error</h2><p>${esc(e.message)}</p></div>`;
+      `<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><h2>Error</h2><p>${esc(e.message)}</p></div>`;
   }
 }
 
@@ -124,7 +125,7 @@ function renderList(customers) {
   if (!customers.length) {
     el.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">👥</div>
+        <div class="empty-icon"><i class="fa-solid fa-users"></i></div>
         <h2>No customers yet</h2>
         <p>Customers are saved automatically when you create or save a document, or you can add one manually above.</p>
       </div>`;

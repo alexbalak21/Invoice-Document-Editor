@@ -10,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Documents — Invoice Editor</title>
   <link rel="stylesheet" href="assets/editor.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <style>
     html, body { height: auto; overflow: auto; background: #f0f2f5; }
   </style>
@@ -28,10 +29,10 @@
     DocEditor
   </div>
   <div style="display:flex;gap:8px;margin-left:auto">
-    <a href="customers.php" class="btn btn-ghost btn-sm">👥 Customers</a>
-    <a href="documentation.php" class="btn btn-ghost btn-sm">📖 Docs</a>
-    <button class="btn btn-ghost btn-sm" onclick="openNew('QUOTE')">+ Quote</button>
-    <button class="btn btn-primary btn-sm" onclick="openNew('INVOICE')">+ Invoice</button>
+    <a href="customers.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-users"></i> Customers</a>
+    <a href="documentation.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-book-open"></i> Docs</a>
+    <button class="btn btn-ghost btn-sm" onclick="openNew('QUOTE')"><i class="fa-solid fa-plus"></i> Quote</button>
+    <button class="btn btn-primary btn-sm" onclick="openNew('INVOICE')"><i class="fa-solid fa-plus"></i> Invoice</button>
   </div>
 </header>
 
@@ -53,7 +54,7 @@
 
   <div id="doc-list">
     <div class="empty-state">
-      <div class="empty-icon">📄</div>
+      <div class="empty-icon"><i class="fa-regular fa-file-lines"></i></div>
       <h2>Loading…</h2>
     </div>
   </div>
@@ -102,7 +103,7 @@ async function loadDocs() {
     renderList(json.documents);
   } catch (e) {
     document.getElementById('doc-list').innerHTML = `
-      <div class="empty-state"><div class="empty-icon">⚠️</div><h2>Error</h2><p>${e.message}</p></div>`;
+      <div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><h2>Error</h2><p>${e.message}</p></div>`;
   }
 }
 
@@ -111,7 +112,7 @@ function renderList(docs) {
   if (!docs.length) {
     el.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📄</div>
+        <div class="empty-icon"><i class="fa-regular fa-file-lines"></i></div>
         <h2>No documents yet</h2>
         <p>Create your first invoice or quote above.</p>
       </div>`;

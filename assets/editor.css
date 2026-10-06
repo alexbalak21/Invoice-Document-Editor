@@ -292,3 +292,10 @@ html, body { height: 100%; overflow: hidden; font-family: var(--font); color: va
 .cust-form-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--ui-text); }
 .cust-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
 .cust-form-grid .full { grid-column: 1 / -1; }
+/* ── Font Awesome icon alignment ── */
+.btn i, .btn-pick-customer i { font-size: 12px; vertical-align: middle; margin-right: 3px; }
+.btn-del-row i { font-size: 11px; }
+.cust-modal-close i { font-size: 14px; }
+.empty-icon i { font-size: 40px; color: var(--ui-text-muted); }
+.topbar-brand i { font-size: 14px; }
+.sec-icon i, .ql-icon i { font-size: inherit; }

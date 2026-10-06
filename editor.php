@@ -721,12 +721,10 @@ function onFormChange() {
 }
 
 function updateTopBar(d) {
-  document.getElementById('topbar-docnum').textContent = d.number ? `— ${d.number}` : '';
   const badge = document.getElementById('topbar-type-badge');
-  badge.textContent = d.type || 'INVOICE';
-  badge.className = 'topbar-doc-type';
-  const numCenter = document.getElementById('topbar-docnum-center');
-  if (numCenter) numCenter.textContent = d.number ? `— ${d.number}` : '';
+  if (badge) { badge.textContent = d.type || 'INVOICE'; badge.className = 'topbar-doc-type'; }
+  const numEl = document.getElementById('topbar-docnum-center');
+  if (numEl) numEl.textContent = d.number ? `— ${d.number}` : '';
 }
 
 // ── Wire all form inputs ────────────────────────────────────

@@ -50,7 +50,8 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
   </div>
 
   <a href="index.php" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> History</a>
-  <button class="btn btn-ghost btn-sm" id="btn-export" title="Download document as JSON"><i class="fa-solid fa-download"></i> Export JSON</button>
+  <button class="btn btn-ghost btn-sm" id="btn-export" title="Download current document as JSON"><i class="fa-solid fa-download"></i> Export JSON</button>
+  <button class="btn btn-ghost btn-sm" id="btn-model" title="Download a fully annotated JSON model to give to an AI"><i class="fa-solid fa-cube"></i> Model JSON</button>
   <label class="btn btn-ghost btn-sm" id="btn-import-label" title="Load a JSON file into the editor" style="cursor:pointer"><i class="fa-solid fa-upload"></i> Import JSON<input type="file" id="btn-import" accept=".json,application/json" style="display:none"></label>
   <button class="btn btn-ghost btn-sm" id="btn-print" title="Print / Save as PDF"><i class="fa-solid fa-print"></i> Print</button>
   <button class="btn btn-primary btn-sm" id="btn-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
@@ -804,6 +805,173 @@ document.getElementById('btn-export').addEventListener('click', () => {
   toast('JSON exported — ' + name + '.json', 'success');
 });
 
+// ── Download Model JSON ─────────────────────────────────────
+const MODEL_JSON = {
+  "_instructions": [
+    "This is a reference model for DocEditor. Fill the fields below and import the file into the editor.",
+    "Fields marked _note are for your understanding only — remove them before importing.",
+    "All fields are optional except 'type'. Unknown keys are ignored on import.",
+    "To import: open the editor → ⬆ Import JSON → select your filled file."
+  ],
+
+  "type": {
+    "_note": "Document heading. One of: INVOICE | QUOTE | CREDIT NOTE | OTHER | or any custom string e.g. PROFORMA, DELIVERY NOTE",
+    "_value": "INVOICE"
+  },
+  "number": {
+    "_note": "Document reference number. Format suggestion: INV-YYYYMMDD-N. Use the ✨ button in the editor to auto-generate.",
+    "_value": "INV-20261006-1"
+  },
+  "date": {
+    "_note": "Document date in ISO format YYYY-MM-DD.",
+    "_value": "2026-10-06"
+  },
+  "due_date": {
+    "_note": "Payment due date in ISO format YYYY-MM-DD. Leave empty if not applicable.",
+    "_value": ""
+  },
+  "service_date": {
+    "_note": "Date the service was performed. Leave empty if not applicable.",
+    "_value": ""
+  },
+  "quote_ref": {
+    "_note": "Reference to a related quote number, shown on invoices. Leave empty if not applicable.",
+    "_value": ""
+  },
+  "tracking": {
+    "_note": "Shipment or parcel tracking number. Leave empty if not applicable.",
+    "_value": ""
+  },
+  "currency": {
+    "_note": "ISO currency code. One of: EUR | USD | GBP | CHF — or any other code.",
+    "_value": "EUR"
+  },
+  "currency_symbol": {
+    "_note": "Symbol displayed next to amounts. Auto-set from currency but can be overridden.",
+    "_value": "€"
+  },
+
+  "issuer": {
+    "_note": "Your company details — shown in the document header.",
+    "name":    "NOVOCIB SAS",
+    "address": "BD de Chatillon, Quai Jean Voisin",
+    "city":    "62200 Boulogne-sur-Mer — France",
+    "email":   "contact@novocib.com",
+    "legal":   "SAS, société par actions simplifiée — Share capital: 260 158,00 €\nEORI# FR48237937700047\nVAT# FR90 482 379 377"
+  },
+
+  "customer": {
+    "_note": "The client / bill-to details.",
+    "name":    "Pureture Co.",
+    "address": "4F, 2121-3 Nambusunhwan-ro",
+    "city":    "06725 Seocho-gu, Seoul — Republic of Korea",
+    "contact": "Sohee Yoon",
+    "phone":   "+82-10-6681-1162",
+    "vat":     ""
+  },
+
+  "items": {
+    "_note": "Array of line items. Each item has the fields shown below. is_free marks a complimentary item (shown as 'offert', excluded from subtotal).",
+    "_value": [
+      {
+        "name":        "HPLC-UV Analysis — Kinetics Study",
+        "description": "3 concentrations, triplicate measurements",
+        "reference":   "S1200-03-NA",
+        "unit_price":  300,
+        "qty":         2,
+        "is_free":     false
+      },
+      {
+        "name":        "Sample Preparation",
+        "description": "Weighing and dissolution",
+        "reference":   "S0010-01",
+        "unit_price":  80,
+        "qty":         1,
+        "is_free":     false
+      },
+      {
+        "name":        "Complimentary Consultation",
+        "description": "Protocol review — offered as a courtesy",
+        "reference":   "",
+        "unit_price":  150,
+        "qty":         1,
+        "is_free":     true
+      }
+    ]
+  },
+
+  "vat_rate": {
+    "_note": "VAT percentage applied to the subtotal. Set to 0 for tax-exempt or export invoices.",
+    "_value": 0
+  },
+  "vat_mention": {
+    "_note": "Italic note printed below the totals block, e.g. to explain VAT exemption.",
+    "_value": "VAT not applicable — export outside the EU (art. 259-1 CGI)"
+  },
+
+  "show_amount_paid": {
+    "_note": "Set to true to show an 'Amount Paid' row and a remaining balance.",
+    "_value": false
+  },
+  "amount_paid": {
+    "_note": "Amount already paid. Only used when show_amount_paid is true.",
+    "_value": 0
+  },
+  "balance_label": {
+    "_note": "Label for the grand total row.",
+    "_value": "TOTAL DUE"
+  },
+
+  "notes": {
+    "_note": "Free-text block printed below the VAT mention. Use \\n for line breaks.",
+    "_value": ""
+  },
+  "terms": {
+    "_note": "Terms and conditions block printed below the bank details.",
+    "_value": "PAYMENT IMMEDIATE UPON RECEIPT, by credit card or wire transfer. A fixed indemnity of 40 euros for recovery costs is due to the creditor in case of late payment."
+  },
+
+  "bank": {
+    "_note": "Bank details block. Use the preset name to pick a pre-configured account, or fill all fields manually. preset: EUR | USD | CUSTOM",
+    "preset":       "EUR",
+    "label":        "Bank Details EUR - Banque Populaire, France",
+    "beneficiary":  "SAS NOVOCIB",
+    "bank_name":    "BANQUE POPULAIRE AUVERGNE RHÔNE ALPES (BPAURA)",
+    "bank_address": "215 Avenue Jean Jaurès, 69007 Lyon, France",
+    "iban":         "FR76 1680 7004 0081 0876 0421 151",
+    "bic":          "CCBPFRPPGRE"
+  },
+
+  "footer_thanks": {
+    "_note": "Centred thank-you line in the document footer.",
+    "_value": "Thank you for your business!"
+  },
+  "footer_contact": {
+    "_note": "Small contact line(s) in the footer. Use \\n for multiple lines.",
+    "_value": "If you have any questions, please contact us.\n• contact@novocib.com"
+  },
+
+  "_ai_prompt_suggestions": [
+    "Fill this model for customer [NAME] with the following services: ...",
+    "Change the type to QUOTE and remove the bank details section.",
+    "Add 3 line items for HPLC analysis at €300 each, VAT not applicable, due immediately.",
+    "Use the USD bank account and set currency to USD.",
+    "Mark this as partially paid: amount_paid = 500, show_amount_paid = true.",
+    "Set a custom document type to PROFORMA and add a tracking number."
+  ]
+};
+
+document.getElementById('btn-model').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(MODEL_JSON, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'model.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('model.json downloaded — give it to your AI!', 'success');
+});
+
 // ── Import JSON ─────────────────────────────────────────────
 document.getElementById('btn-import').addEventListener('change', function () {
   const file = this.files[0];
@@ -811,8 +979,23 @@ document.getElementById('btn-import').addEventListener('change', function () {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const d = JSON.parse(e.target.result);
-      if (typeof d !== 'object' || d === null) throw new Error('Invalid JSON structure');
+      const raw = JSON.parse(e.target.result);
+      if (typeof raw !== 'object' || raw === null) throw new Error('Invalid JSON structure');
+
+      // Flatten model.json format: {field: {_value: x, _note: ...}} → {field: x}
+      function flattenModel(obj) {
+        if (Array.isArray(obj)) return obj.map(flattenModel);
+        if (typeof obj !== 'object' || obj === null) return obj;
+        // If the object has _value, it's a model wrapper
+        if ('_value' in obj) return flattenModel(obj._value);
+        const out = {};
+        for (const [k, v] of Object.entries(obj)) {
+          if (k.startsWith('_')) continue; // strip _note, _instructions, etc.
+          out[k] = flattenModel(v);
+        }
+        return out;
+      }
+      const d = flattenModel(raw);
       populateForm(d);
       renderPreview(d);
       isDirty = true;

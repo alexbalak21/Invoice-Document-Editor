@@ -299,3 +299,42 @@ html, body { height: 100%; overflow: hidden; font-family: var(--font); color: va
 .empty-icon i { font-size: 40px; color: var(--ui-text-muted); }
 .topbar-brand i { font-size: 14px; }
 .sec-icon i, .ql-icon i { font-size: inherit; }
+
+/* ── Number field with generate button ── */
+.input-with-btn {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--ui-input-border);
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--ui-input-bg);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input-with-btn:focus-within {
+  border-color: var(--ui-focus);
+  box-shadow: 0 0 0 2px rgba(55,113,200,.12);
+}
+.input-with-btn input {
+  flex: 1;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  min-width: 0;
+}
+.input-with-btn input:focus { outline: none; box-shadow: none !important; }
+.input-with-btn button {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--ui-input-border);
+  padding: 0 10px;
+  color: var(--ui-primary);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .13s, color .13s;
+  display: flex;
+  align-items: center;
+}
+.input-with-btn button:hover { background: rgba(55,113,200,.08); }
+.input-with-btn button:disabled { opacity: .4; cursor: not-allowed; }

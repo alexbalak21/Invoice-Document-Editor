@@ -29,6 +29,15 @@ function getDB(): PDO {
         )
     ");
     $pdo->exec("
+        CREATE TABLE IF NOT EXISTS document_numbers (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            prefix     TEXT NOT NULL,
+            date_key   TEXT NOT NULL,
+            counter    INTEGER NOT NULL DEFAULT 1,
+            UNIQUE(prefix, date_key)
+        )
+    ");
+    $pdo->exec("
         CREATE TABLE IF NOT EXISTS customers (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             name       TEXT NOT NULL DEFAULT '',
@@ -70,6 +79,23 @@ function upsertCustomer(PDO $pdo, array $cust): void {
             trim($cust['vat'] ?? ''),
         ]);
     }
+}
+
+// ── Map document type → number prefix ─────────────────────────
+function typeToPrefix(string $type): string {
+    $map = [
+        'INVOICE'     => 'INV',
+        'QUOTE'       => 'QUO',
+        'CREDIT NOTE' => 'CRN',
+        'OTHER'       => 'DOC',
+        'PROFORMA'    => 'PRO',
+        'DELIVERY NOTE' => 'DLV',
+    ];
+    $type = strtoupper(trim($type));
+    if (isset($map[$type])) return $map[$type];
+    // Custom type: use first 3 uppercase letters, strip spaces/special chars
+    $clean = preg_replace('/[^A-Z]/', '', $type);
+    return $clean !== '' ? substr($clean, 0, 3) : 'DOC';
 }
 
 function respond(array $payload, int $code = 200): never {
@@ -320,6 +346,47 @@ try {
         if (!$id) error('Missing id');
         $pdo->prepare("DELETE FROM customers WHERE id = ?")->execute([$id]);
         respond(['ok' => true]);
+    }
+
+    // ── DOCUMENT NUMBER GENERATOR ──────────────────────────────
+
+    // GET next number (increments counter atomically)
+    if ($action === 'next_number' && $method === 'GET') {
+        $type    = strtoupper(trim($_GET['type'] ?? 'INVOICE'));
+        $prefix  = typeToPrefix($type);
+        $dateKey = date('Ymd'); // yyyymmdd
+
+        // Upsert: insert or increment counter
+        $pdo->exec("
+            INSERT INTO document_numbers (prefix, date_key, counter)
+            VALUES ('$prefix', '$dateKey', 1)
+            ON CONFLICT(prefix, date_key) DO UPDATE SET counter = counter + 1
+        ");
+
+        $stmt = $pdo->prepare("
+            SELECT counter FROM document_numbers WHERE prefix = ? AND date_key = ?
+        ");
+        $stmt->execute([$prefix, $dateKey]);
+        $counter = (int)$stmt->fetchColumn();
+
+        $number = $prefix . '-' . $dateKey . '-' . $counter;
+        respond(['ok' => true, 'number' => $number, 'prefix' => $prefix, 'date_key' => $dateKey, 'counter' => $counter]);
+    }
+
+    // PEEK at current counter without incrementing
+    if ($action === 'peek_number' && $method === 'GET') {
+        $type    = strtoupper(trim($_GET['type'] ?? 'INVOICE'));
+        $prefix  = typeToPrefix($type);
+        $dateKey = date('Ymd');
+
+        $stmt = $pdo->prepare("
+            SELECT counter FROM document_numbers WHERE prefix = ? AND date_key = ?
+        ");
+        $stmt->execute([$prefix, $dateKey]);
+        $row = $stmt->fetchColumn();
+        $counter = $row !== false ? (int)$row + 1 : 1;
+        $number  = $prefix . '-' . $dateKey . '-' . $counter;
+        respond(['ok' => true, 'number' => $number, 'prefix' => $prefix, 'date_key' => $dateKey, 'counter' => $counter]);
     }
 
     error('Unknown action or method', 404);

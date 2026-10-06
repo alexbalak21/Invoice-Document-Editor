@@ -84,7 +84,13 @@ $pageTitle = $editId ? "Edit Document #$editId" : "New $newType";
             <input id="f-type-custom" type="text" placeholder="e.g. DELIVERY NOTE, PROFORMA…">
           </div>
           <div class="field-row col2">
-            <div class="field"><label>Number</label><input id="f-number" type="text" placeholder="INV-260805-01"></div>
+            <div class="field">
+              <label>Number</label>
+              <div class="input-with-btn">
+                <input id="f-number" type="text" placeholder="INV-20261006-1">
+                <button type="button" id="btn-gen-number" title="Generate next document number"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+              </div>
+            </div>
             <div class="field"><label>Date</label><input id="f-date" type="date"></div>
           </div>
           <div class="field-row col2">
@@ -821,6 +827,29 @@ document.getElementById('btn-import').addEventListener('change', function () {
   reader.readAsText(file);
 });
 
+// ── Generate document number ────────────────────────────────
+document.getElementById('btn-gen-number').addEventListener('click', async () => {
+  const type = (() => {
+    const raw = v('f-type');
+    if (raw === 'CUSTOM') return v('f-type-custom').trim().toUpperCase() || 'CUSTOM';
+    return raw;
+  })();
+  const btn = document.getElementById('btn-gen-number');
+  btn.disabled = true;
+  try {
+    const res  = await fetch(`api.php?action=next_number&type=${encodeURIComponent(type)}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    document.getElementById('f-number').value = json.number;
+    onFormChange();
+    toast(`Generated ${json.number}`, 'success');
+  } catch (e) {
+    toast('Failed to generate number: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 // ── Toast ───────────────────────────────────────────────────
 function toast(msg, type = '') {
   const c = document.getElementById('toast-container');
@@ -936,4 +965,4 @@ init();
 </script>
 
 </body>
-</html> 
+</html>

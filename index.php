@@ -29,6 +29,7 @@
   </div>
   <div style="display:flex;gap:8px;margin-left:auto">
     <a href="customers.php" class="btn btn-ghost btn-sm">👥 Customers</a>
+    <a href="documentation.php" class="btn btn-ghost btn-sm">📖 Docs</a>
     <button class="btn btn-ghost btn-sm" onclick="openNew('QUOTE')">+ Quote</button>
     <button class="btn btn-primary btn-sm" onclick="openNew('INVOICE')">+ Invoice</button>
   </div>

@@ -1,0 +1,10 @@
+implement a product manager like the customers
+Import the products from the website.
+Implement MySQL connection
+Implement secure login method
+Implement 2F auth with email
+Implement MySQL encryption.
+Implement a color theme for Invoice / Quotes
+Need to add PO (Purchase order in invoice) optional check mark
+Need to add starting date & ending date of the service (optional ending)
+Need a system to follow the progress of invoices & documents, in progress, payed, payment due.... 

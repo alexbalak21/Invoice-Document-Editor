@@ -1,0 +1,193 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Document;
+use App\Repositories\DocumentRepository;
+use App\Repositories\CustomerRepository;
+use App\Core\Database;
+
+class DocumentService
+{
+    public function __construct(
+        private DocumentRepository $docs     = new DocumentRepository(),
+        private CustomerRepository $customers = new CustomerRepository(),
+    ) {}
+
+    public function list(string $search = '', string $type = ''): array
+    {
+        return array_map(
+            fn(Document $d) => $d->toSummary(),
+            $this->docs->findAll($search, $type)
+        );
+    }
+
+    public function get(int $id): ?Document
+    {
+        return $this->docs->findById($id);
+    }
+
+    public function create(array $data): int
+    {
+        $doc = new Document(
+            id:       null,
+            type:     strtoupper(trim($data['type']              ?? 'INVOICE')),
+            number:   trim($data['number']                       ?? ''),
+            date:     trim($data['date']                         ?? date('Y-m-d')),
+            status:   'draft',
+            customer: trim($data['customer']['name']             ?? ''),
+            data:     $data,
+        );
+        $id = $this->docs->create($doc);
+        $this->upsertCustomer($data['customer'] ?? []);
+        return $id;
+    }
+
+    public function update(int $id, array $data, string $status = 'draft'): void
+    {
+        $doc = new Document(
+            id:       $id,
+            type:     strtoupper(trim($data['type']              ?? 'INVOICE')),
+            number:   trim($data['number']                       ?? ''),
+            date:     trim($data['date']                         ?? date('Y-m-d')),
+            status:   $status,
+            customer: trim($data['customer']['name']             ?? ''),
+            data:     $data,
+        );
+        $this->docs->update($id, $doc);
+        $this->upsertCustomer($data['customer'] ?? []);
+    }
+
+    public function delete(int $id): void
+    {
+        $this->docs->delete($id);
+    }
+
+    public function duplicate(int $id): int
+    {
+        return $this->docs->duplicate($id);
+    }
+
+    public function defaultTemplate(string $type = 'INVOICE'): array
+    {
+        return [
+            'type'         => $type,
+            'number'       => '',
+            'date'         => date('Y-m-d'),
+            'due_date'     => '',
+            'service_date' => '',
+            'quote_ref'    => '',
+            'tracking'     => '',
+            'issuer' => [
+                'name'        => 'NOVOCIB SAS',
+                'address'     => 'BD de Chatillon, Quai Jean Voisin',
+                'city'        => '62200 Boulogne-sur-Mer — France',
+                'email'       => 'lbalakireva@novocib.com',
+                'legal'       => "SAS, société par actions simplifiée — Share capital: 260 158,00 €\nEORI# FR48237937700047\nVAT# FR90 482 379 377",
+                'logo_base64' => '',
+            ],
+            'customer' => [
+                'name' => '', 'address' => '', 'city' => '',
+                'contact' => '', 'phone' => '', 'vat' => '',
+            ],
+            'currency'        => 'EUR',
+            'currency_symbol' => '€',
+            'items'           => [],
+            'vat_rate'        => 0,
+            'amount_paid'     => 0,
+            'show_amount_paid'=> false,
+            'balance_label'   => 'TOTAL DUE',
+            'vat_mention'     => '',
+            'notes'           => '',
+            'terms'           => 'PAYMENT IMMEDIATE UPON RECEIPT, by credit card or wire transfer.',
+            'bank' => [
+                'label'        => 'Bank Details EUR - Banque Populaire, France',
+                'beneficiary'  => 'SAS NOVOCIB',
+                'bank_name'    => 'BANQUE POPULAIRE AUVERGNE RHÔNE ALPES (BPAURA)',
+                'bank_address' => '215 Avenue Jean Jaurès, 69007 Lyon, France',
+                'iban'         => 'FR76 1680 7004 0081 0876 0421 151',
+                'bic'          => 'CCBPFRPPGRE',
+            ],
+            'footer_thanks'  => 'Thank you for your business!',
+            'footer_contact' => "If you have any questions, please contact us.\n• lbalakireva@novocib.com",
+        ];
+    }
+
+    // ── Document numbering ────────────────────────────────────
+
+    private static array $prefixMap = [
+        'INVOICE'        => 'INV',
+        'QUOTE'          => 'QUO',
+        'CREDIT NOTE'    => 'CRN',
+        'OTHER'          => 'DOC',
+        'PROFORMA'       => 'PRO',
+        'DELIVERY NOTE'  => 'DLV',
+    ];
+
+    public function typeToPrefix(string $type): string
+    {
+        $type = strtoupper(trim($type));
+        if (isset(self::$prefixMap[$type])) return self::$prefixMap[$type];
+        $clean = preg_replace('/[^A-Z]/', '', $type);
+        return $clean !== '' ? substr($clean, 0, 3) : 'DOC';
+    }
+
+    public function nextNumber(string $type): array
+    {
+        $prefix  = $this->typeToPrefix($type);
+        $dateKey = date('Ymd');
+        $db      = Database::getInstance();
+
+        $db->prepare('
+            INSERT INTO document_numbers (prefix, date_key, counter)
+            VALUES (?, ?, 1)
+            ON DUPLICATE KEY UPDATE counter = counter + 1
+        ')->execute([$prefix, $dateKey]);
+
+        $counter = (int) $db->prepare('
+            SELECT counter FROM document_numbers WHERE prefix = ? AND date_key = ?
+        ')->execute([$prefix, $dateKey]) ? $db->query(
+            "SELECT counter FROM document_numbers WHERE prefix='$prefix' AND date_key='$dateKey'"
+        )->fetchColumn() : 1;
+
+        return ['number' => "$prefix-$dateKey-$counter", 'prefix' => $prefix, 'counter' => $counter];
+    }
+
+    public function peekNumber(string $type): array
+    {
+        $prefix  = $this->typeToPrefix($type);
+        $dateKey = date('Ymd');
+        $db      = Database::getInstance();
+
+        $stmt = $db->prepare('SELECT counter FROM document_numbers WHERE prefix = ? AND date_key = ?');
+        $stmt->execute([$prefix, $dateKey]);
+        $current = $stmt->fetchColumn();
+        $counter = $current !== false ? (int)$current + 1 : 1;
+
+        return ['number' => "$prefix-$dateKey-$counter", 'prefix' => $prefix, 'counter' => $counter];
+    }
+
+    // ── Auto-upsert customer from document ────────────────────
+    private function upsertCustomer(array $cust): void
+    {
+        $name = trim($cust['name'] ?? '');
+        if ($name === '') return;
+
+        $existing = $this->customers->findByName($name);
+        $model    = new \App\Models\Customer(
+            id:      null,
+            name:    $name,
+            address: trim($cust['address'] ?? ''),
+            city:    trim($cust['city']    ?? ''),
+            contact: trim($cust['contact'] ?? ''),
+            phone:   trim($cust['phone']   ?? ''),
+            vat:     trim($cust['vat']     ?? ''),
+        );
+
+        if ($existing) {
+            $this->customers->update($existing->id, $model);
+        } else {
+            $this->customers->create($model);
+        }
+    }
+}

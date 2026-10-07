@@ -115,10 +115,12 @@ html, body { height: 100%; overflow: hidden; font-family: var(--font); color: va
 }
 
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 5px; border: none; cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 500; transition: background .15s, opacity .15s; text-decoration: none; white-space: nowrap; }
-.btn-primary { background: white; color: var(--ui-primary); }
-.btn-primary:hover { background: #e8effc; }
+.btn-primary { background: var(--ui-primary); color: white; }
+.btn-primary:hover { background: var(--ui-primary-hover); }
 .btn-ghost { background: rgba(255,255,255,.12); color: white; border: 1px solid rgba(255,255,255,.2); }
 .btn-ghost:hover { background: rgba(255,255,255,.22); }
+.btn-secondary { background: white; color: var(--ui-text); border: 1px solid var(--ui-input-border); }
+.btn-secondary:hover { background: #f0f2f5; border-color: #b0b6c2; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
 .btn-danger { background: var(--ui-danger); color: white; }
 .btn-danger:hover { opacity: .87; }

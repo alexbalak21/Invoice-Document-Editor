@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= htmlspecialchars($title ?? 'Editor') ?> — DocEditor</title>
+  <link rel="stylesheet" href="/assets/editor.css">
+  <link rel="stylesheet" href="/assets/document.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <style>html,body{height:100%;overflow:hidden;} .app-body{height:calc(100vh - var(--topbar-h));}</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/documents" class="topbar-brand">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="3" y="2" width="14" height="16" rx="2" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="1.5"/>
+      <line x1="6" y1="7" x2="14" y2="7" stroke="white" stroke-width="1.2"/>
+      <line x1="6" y1="10" x2="14" y2="10" stroke="white" stroke-width="1.2"/>
+      <line x1="6" y1="13" x2="11" y2="13" stroke="white" stroke-width="1.2"/>
+    </svg>
+    DocEditor
+    <span id="topbar-docnum-center"></span>
+  </a>
+  <span id="topbar-type-badge" class="topbar-doc-type">INVOICE</span>
+
+  <nav class="topbar-nav" style="margin-left:12px">
+    <a href="/documents"><i class="fa-solid fa-arrow-left"></i> History</a>
+    <a href="/customers"><i class="fa-solid fa-users"></i> Customers</a>
+    <a href="/items"><i class="fa-solid fa-boxes-stacked"></i> Items</a>
+  </nav>
+
+  <div class="topbar-actions" style="margin-left:auto">
+    <button class="btn btn-ghost btn-sm" id="btn-model" title="Download annotated JSON template for AI">
+      <i class="fa-solid fa-cube"></i> Model JSON
+    </button>
+    <button class="btn btn-ghost btn-sm" id="btn-export" title="Download current document as JSON">
+      <i class="fa-solid fa-download"></i> Export JSON
+    </button>
+    <label class="btn btn-ghost btn-sm" title="Import JSON into editor" style="cursor:pointer">
+      <i class="fa-solid fa-upload"></i> Import JSON
+      <input type="file" id="btn-import" accept=".json" style="display:none">
+    </label>
+    <button class="btn btn-ghost btn-sm" id="btn-print"><i class="fa-solid fa-print"></i> Print</button>
+    <button class="btn btn-primary btn-sm" id="btn-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+  </div>
+</header>
+
+<?= $content ?>
+
+<div class="toast-container" id="toast-container"></div>
+</body>
+</html>

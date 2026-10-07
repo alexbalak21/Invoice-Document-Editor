@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Controllers\Api;
+
+use App\Core\Request;
+use App\Core\Response;
+use App\Services\DocumentService;
+
+class DocumentApiController
+{
+    private DocumentService $service;
+    private Request $request;
+
+    public function __construct()
+    {
+        $this->service = new DocumentService();
+        $this->request = new Request();
+    }
+
+    public function index(): void
+    {
+        $docs = $this->service->list(
+            search: $this->request->query('q', ''),
+            type:   $this->request->query('type', ''),
+        );
+        Response::ok(['documents' => $docs]);
+    }
+
+    public function show(array $params): void
+    {
+        $doc = $this->service->get((int)$params['id']);
+        if (!$doc) Response::error('Document not found', 404);
+        Response::ok(['document' => $doc->toArray()]);
+    }
+
+    public function store(): void
+    {
+        $data = $this->request->input('data') ?? $this->service->defaultTemplate(
+            $this->request->input('type', 'INVOICE')
+        );
+        $id = $this->service->create($data);
+        Response::ok(['id' => $id]);
+    }
+
+    public function update(array $params): void
+    {
+        $data = $this->request->input('data');
+        if (!$data) Response::error('No data provided');
+        $this->service->update(
+            id:     (int)$params['id'],
+            data:   $data,
+            status: $this->request->input('status', 'draft'),
+        );
+        Response::ok(['id' => (int)$params['id']]);
+    }
+
+    public function destroy(array $params): void
+    {
+        $this->service->delete((int)$params['id']);
+        Response::ok();
+    }
+
+    public function duplicate(array $params): void
+    {
+        $newId = $this->service->duplicate((int)$params['id']);
+        Response::ok(['id' => $newId]);
+    }
+
+    public function default(): void
+    {
+        $type = strtoupper($this->request->query('type', 'INVOICE'));
+        Response::ok(['data' => $this->service->defaultTemplate($type)]);
+    }
+
+    public function nextNumber(): void
+    {
+        $type = $this->request->query('type', 'INVOICE');
+        Response::ok($this->service->nextNumber($type));
+    }
+
+    public function peekNumber(): void
+    {
+        $type = $this->request->query('type', 'INVOICE');
+        Response::ok($this->service->peekNumber($type));
+    }
+}

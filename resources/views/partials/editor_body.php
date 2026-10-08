@@ -5,7 +5,7 @@
  * API routes use the new REST paths: /api/documents, /api/customers, /api/items
  */
 ?>
-<link rel="stylesheet" href="/assets/document.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/document.css">
 <style>
   html, body { height: 100%; overflow: hidden; }
   .app-body  { height: calc(100vh - var(--topbar-h)); }
@@ -31,11 +31,15 @@
           </div>
           <div class="field-row col2">
             <div class="field"><label>Due Date</label><input id="f-due-date" type="date"></div>
-            <div class="field"><label>Service Date</label><input id="f-service-date" type="date"></div>
+            <div class="field"><label>Tracking #</label><input id="f-tracking" type="text"></div>
+          </div>
+          <div class="field-row col2">
+            <div class="field"><label>Service Date — Start</label><input id="f-service-start" type="date"></div>
+            <div class="field"><label>Service Date — End</label><input id="f-service-end" type="date"></div>
           </div>
           <div class="field-row col2">
             <div class="field"><label>Quote Ref.</label><input id="f-quote-ref" type="text"></div>
-            <div class="field"><label>Tracking #</label><input id="f-tracking" type="text"></div>
+            <div class="field"><label>PO Number <span style="color:var(--ui-text-muted);font-weight:400">(optional)</span></label><input id="f-po" type="text" placeholder="Customer purchase order"></div>
           </div>
           <div class="field-row col2">
             <div class="field"><label>Currency</label>
@@ -141,7 +145,7 @@
     <div class="cust-modal-search"><input type="text" id="customer-search" placeholder="Search name, city…" oninput="searchCustomers(this.value)" autocomplete="off"></div>
     <div class="cust-modal-list" id="customer-modal-list"><div class="cust-empty">Loading…</div></div>
     <div class="cust-modal-footer">
-      <a href="/customers" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none"><i class="fa-solid fa-gear"></i> Manage customers</a>
+      <a href="<?= BASE_URL ?>/customers" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none"><i class="fa-solid fa-gear"></i> Manage customers</a>
     </div>
   </div>
 </div>
@@ -154,7 +158,7 @@
     <div class="cust-modal-search"><input type="text" id="item-search" placeholder="Search reference, title…" oninput="searchItems(this.value)" autocomplete="off"></div>
     <div class="cust-modal-list" id="item-modal-list"><div class="cust-empty">Loading…</div></div>
     <div class="cust-modal-footer">
-      <a href="/items" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none"><i class="fa-solid fa-gear"></i> Manage items</a>
+      <a href="<?= BASE_URL ?>/items" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none"><i class="fa-solid fa-gear"></i> Manage items</a>
     </div>
   </div>
 </div>
@@ -167,15 +171,15 @@ const LOGO_DATA_URI= <?= json_encode($logoDataUri) ?>;
 
 // ── All API calls now use new REST routes ─────────────────────
 const API = {
-  docList:      (q,type) => `/api/documents?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`,
-  docGet:       (id)     => `/api/documents/${id}`,
-  docSave:      ()       => `/api/documents`,
-  docUpdate:    (id)     => `/api/documents/${id}`,
-  docDefault:   (type)   => `/api/documents/default?type=${encodeURIComponent(type)}`,
-  customers:    (q)      => `/api/customers?q=${encodeURIComponent(q)}`,
-  customerGet:  (id)     => `/api/customers/${id}`,
-  items:        (q)      => `/api/items?q=${encodeURIComponent(q)}`,
-  itemGet:      (id)     => `/api/items/${id}`,
+  docList:      (q,type) => `${BASE}/api/documents?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`,
+  docGet:       (id)     => `${BASE}/api/documents/${id}`,
+  docSave:      ()       => `${BASE}/api/documents`,
+  docUpdate:    (id)     => `${BASE}/api/documents/${id}`,
+  docDefault:   (type)   => `${BASE}/api/documents/default?type=${encodeURIComponent(type)}`,
+  customers:    (q)      => `${BASE}/api/customers?q=${encodeURIComponent(q)}`,
+  customerGet:  (id)     => `${BASE}/api/customers/${id}`,
+  items:        (q)      => `${BASE}/api/items?q=${encodeURIComponent(q)}`,
+  itemGet:      (id)     => `${BASE}/api/items/${id}`,
 };
 
 <?php

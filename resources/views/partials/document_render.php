@@ -7,10 +7,13 @@ $d   = $doc;
 $sym = htmlspecialchars($d['currency_symbol'] ?? '€', ENT_QUOTES);
 $type = htmlspecialchars($d['type'] ?? 'INVOICE', ENT_QUOTES);
 
-// Hardcoded logo from public/assets/logo.png
-$logoPath = ROOT . '/public/assets/logo.png';
+// Hardcoded logo: assets/logo.png (or public/assets/logo.png)
+$logoPath = '';
+foreach ([ROOT . '/assets/logo.png', ROOT . '/public/assets/logo.png'] as $__p) {
+    if (is_file($__p)) { $logoPath = $__p; break; }
+}
 $logoTag  = '';
-if (file_exists($logoPath)) {
+if ($logoPath !== '') {
     $logoB64 = base64_encode(file_get_contents($logoPath));
     $logoTag = '<img class="logo" src="data:image/png;base64,' . $logoB64 . '" alt="Logo">';
 }
@@ -32,10 +35,17 @@ $total     = $subtotal + $vatAmount;
 $amtPaid   = (float)($d['amount_paid'] ?? 0);
 $balance   = $total - $amtPaid;
 
+// Service period: "start – end", just "start", or "Until end" (service_date = legacy single field)
+$svcStart = $d['service_date_start'] ?? ($d['service_date'] ?? '');
+$svcEnd   = $d['service_date_end']   ?? '';
+$svcLabel = ($svcStart !== '' && $svcEnd !== '') ? "$svcStart – $svcEnd"
+          : ($svcStart !== '' ? $svcStart : ($svcEnd !== '' ? "Until $svcEnd" : ''));
+
 $extraRows = [];
 if (!empty($d['quote_ref']))    $extraRows[] = ['Quote:',        htmlspecialchars($d['quote_ref'])];
+if (!empty($d['po_number']))    $extraRows[] = ['PO:',           htmlspecialchars($d['po_number'])];
 if (!empty($d['due_date']))     $extraRows[] = ['Due Date:',     htmlspecialchars($d['due_date'])];
-if (!empty($d['service_date'])) $extraRows[] = ['Service Date:', htmlspecialchars($d['service_date'])];
+if ($svcLabel !== '')           $extraRows[] = ['Service Date:', htmlspecialchars($svcLabel)];
 if (!empty($d['tracking']))     $extraRows[] = ['Tracking:',     htmlspecialchars($d['tracking'])];
 ?>
 <div class="page">

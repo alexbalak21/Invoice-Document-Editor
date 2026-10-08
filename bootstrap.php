@@ -2,6 +2,12 @@
 
 define('ROOT', __DIR__);
 
+// URL prefix of the app when it lives in a sub-folder (e.g. "/DocEditor" under Apache/XAMPP).
+// Empty string when served from the web root (php -S localhost:8000).
+$__dir = PHP_SAPI === 'cli' ? '' : rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+define('BASE_URL', $__dir === '.' ? '' : $__dir);
+unset($__dir);
+
 // ── Autoloader ────────────────────────────────────────────────
 // If composer install has been run, use its autoloader (includes phpdotenv).
 // Otherwise fall back to our own simple PSR-4 loader.
@@ -37,7 +43,7 @@ error_reporting($debug ? E_ALL : 0);
 
 if (!$debug) {
     set_exception_handler(function (Throwable $e): void {
-        $isApi = str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/api/');
+        $isApi = str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/');
         if ($isApi) {
             \App\Core\Response::error('Internal server error', 500);
         } else {

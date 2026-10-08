@@ -24,7 +24,9 @@ document.querySelectorAll('.form-section-header').forEach(hdr => {
 function collectDoc() {
   return {
     type: v('f-type'), number: v('f-number'), date: v('f-date'),
-    due_date: v('f-due-date'), service_date: v('f-service-date'),
+    due_date: v('f-due-date'),
+    service_date_start: v('f-service-start'), service_date_end: v('f-service-end'),
+    po_number: v('f-po'),
     quote_ref: v('f-quote-ref'), tracking: v('f-tracking'),
     currency: v('f-currency'), currency_symbol: v('f-currency-symbol'),
     issuer: {
@@ -94,7 +96,9 @@ wire('btn-add-item', 'click', () => { addItemRow(); onFormChange(); });
 // ── Populate form ─────────────────────────────────────────────
 function populateForm(d) {
   set('f-type', d.type??'INVOICE'); set('f-number',d.number??''); set('f-date',d.date??'');
-  set('f-due-date',d.due_date??''); set('f-service-date',d.service_date??'');
+  set('f-due-date',d.due_date??'');
+  set('f-service-start',d.service_date_start??d.service_date??''); set('f-service-end',d.service_date_end??'');
+  set('f-po',d.po_number??'');
   set('f-quote-ref',d.quote_ref??''); set('f-tracking',d.tracking??'');
   set('f-currency',d.currency??'EUR'); set('f-currency-symbol',d.currency_symbol??'€');
   const iss = d.issuer??{};
@@ -127,13 +131,25 @@ wire('f-currency', 'change', function() {
 });
 
 // ── Live preview ──────────────────────────────────────────────
+// Service period label: "start – end", just "start", or "Until end"
+function serviceDateLabel(d) {
+  const s = d.service_date_start || d.service_date || '';   // service_date = legacy single field
+  const e = d.service_date_end || '';
+  if (s && e) return s + ' – ' + e;
+  if (s) return s;
+  if (e) return 'Until ' + e;
+  return '';
+}
+
 function renderPreview(d) {
   const sym = esc(d.currency_symbol||'€');
   const type = esc(d.type||'INVOICE');
   let extraRows='';
+  const svc = serviceDateLabel(d);
   if(d.quote_ref)    extraRows+=`<tr><td>Quote:</td><td>${esc(d.quote_ref)}</td></tr>`;
+  if(d.po_number)    extraRows+=`<tr><td>PO:</td><td>${esc(d.po_number)}</td></tr>`;
   if(d.due_date)     extraRows+=`<tr><td>Due Date:</td><td>${esc(d.due_date)}</td></tr>`;
-  if(d.service_date) extraRows+=`<tr><td>Service Date:</td><td>${esc(d.service_date)}</td></tr>`;
+  if(svc)            extraRows+=`<tr><td>Service Date:</td><td>${esc(svc)}</td></tr>`;
   if(d.tracking)     extraRows+=`<tr><td>Tracking:</td><td>${esc(d.tracking)}</td></tr>`;
   let subtotal=0;
   (d.items||[]).forEach(it=>{if(!it.is_free)subtotal+=(parseFloat(it.unit_price)||0)*(parseFloat(it.qty)||0);});
@@ -214,7 +230,7 @@ async function saveDocument(force=false) {
     else{url=API.docSave();body=JSON.stringify({data:d});}
     const json=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body}).then(r=>r.json());
     if(!json.ok)throw new Error(json.error||'Save failed');
-    if(!currentId&&json.id){currentId=json.id;history.replaceState(null,'',`/editor?id=${currentId}`);}
+    if(!currentId&&json.id){currentId=json.id;history.replaceState(null,'',`${BASE}/editor?id=${currentId}`);}
     isDirty=false; setAutosaveStatus('saved','Saved '+new Date().toLocaleTimeString());
   } catch(e){setAutosaveStatus('error','Save failed: '+e.message);toast('Save failed: '+e.message,'error');}
 }
@@ -233,7 +249,7 @@ wire('btn-save',  'click', async () => { isDirty=true; await saveDocument(true);
 wire('btn-print', 'click', async () => {
   if(isDirty){isDirty=true;await saveDocument(true);}
   if(!currentId){toast('Please save first','error');return;}
-  window.open(`/preview?id=${currentId}`,'_blank');
+  window.open(`${BASE}/preview?id=${currentId}`,'_blank');
 });
 wire('btn-model', 'click', () => {
   const model = {
@@ -247,7 +263,9 @@ wire('btn-model', 'click', () => {
     number:          { _note: "Reference number. Suggested format: INV-YYYYMMDD-N.", _value: "" },
     date:            { _note: "Document date, ISO format YYYY-MM-DD.", _value: new Date().toISOString().slice(0,10) },
     due_date:        { _note: "Payment due date. Leave empty if not applicable.", _value: "" },
-    service_date:    { _note: "Date service was performed. Leave empty if not applicable.", _value: "" },
+    service_date_start: { _note: "First day of the service period, YYYY-MM-DD. Leave empty if not applicable.", _value: "" },
+    service_date_end:   { _note: "Last day of the service period, YYYY-MM-DD. Leave empty for a single-day service.", _value: "" },
+    po_number:          { _note: "Customer purchase order number. Optional — leave empty if there is none.", _value: "" },
     quote_ref:       { _note: "Related quote number. Leave empty if not applicable.", _value: "" },
     tracking:        { _note: "Shipment tracking number. Leave empty if not applicable.", _value: "" },
     currency:        { _note: "ISO code: EUR | USD | GBP | CHF or any other.", _value: "EUR" },
@@ -392,7 +410,7 @@ function searchItems(q){
     const json=await fetch(API.items(q)).then(r=>r.json());
     if(!json.ok){list.innerHTML=`<div class="cust-empty">Error: ${esc(json.error)}</div>`;return;}
     const items=json.items;
-    if(!items.length){list.innerHTML='<div class="cust-empty">No items found. <a href="/items" target="_blank">Add some →</a></div>';return;}
+    if(!items.length){list.innerHTML='<div class="cust-empty">No items found. <a href="'+BASE+'/items" target="_blank">Add some →</a></div>';return;}
     list.innerHTML=items.map(it=>{
       const price=it.price?'€ '+parseFloat(it.price).toLocaleString('fr-FR',{minimumFractionDigits:2}):'';
       const detail=[it.reference,it.unit,price].filter(Boolean).join(' · ');

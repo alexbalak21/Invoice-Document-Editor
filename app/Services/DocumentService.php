@@ -75,7 +75,9 @@ class DocumentService
             'number'       => '',
             'date'         => date('Y-m-d'),
             'due_date'     => '',
-            'service_date' => '',
+            'service_date_start' => '',
+            'service_date_end'   => '',
+            'po_number'          => '',
             'quote_ref'    => '',
             'tracking'     => '',
             'issuer' => [

@@ -2,9 +2,12 @@
 // Copy the editor HTML from old editor.php but with:
 // - API URLs updated to new REST routes
 // - PHP vars ($editId, $newType) already extracted by Response::view()
-$logoPath   = ROOT . '/public/assets/logo.png';
+$logoPath   = '';
+foreach ([ROOT . '/assets/logo.png', ROOT . '/public/assets/logo.png'] as $__p) {
+    if (is_file($__p)) { $logoPath = $__p; break; }
+}
 $logoDataUri = '';
-if (file_exists($logoPath)) {
+if ($logoPath !== '') {
     $logoDataUri = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 }
 ?>

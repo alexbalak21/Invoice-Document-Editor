@@ -40,12 +40,12 @@
 const TYPE_CLASSES   = {INVOICE:'type-invoice',QUOTE:'type-quote','CREDIT NOTE':'type-credit',OTHER:'type-other'};
 const STATUS_CLASSES = {draft:'badge-draft',final:'badge-final',paid:'badge-paid'};
 
-function openNew(type) { window.location.href = `/editor?type=${type}`; }
+function openNew(type) { window.location.href = `${BASE}/editor?type=${type}`; }
 
 async function loadDocs() {
   const q    = document.getElementById('search-input').value.trim();
   const type = document.getElementById('filter-type').value;
-  const url  = `/api/documents?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`;
+  const url  = `${BASE}/api/documents?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`;
   try {
     const json = await fetch(url).then(r => r.json());
     if (!json.ok) throw new Error(json.error);
@@ -72,8 +72,8 @@ function renderList(docs) {
       <td><span class="badge ${STATUS_CLASSES[d.status]||'badge-draft'}">${esc(d.status)}</span></td>
       <td style="color:#9098a8;font-size:12px">${esc((d.updated_at||'').slice(0,16))}</td>
       <td><div class="action-btns">
-        <a href="/editor?id=${d.id}" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none">Edit</a>
-        <a href="/preview?id=${d.id}" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none">Print</a>
+        <a href="${BASE}/editor?id=${d.id}" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none">Edit</a>
+        <a href="${BASE}/preview?id=${d.id}" target="_blank" class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none">Print</a>
         <button class="btn btn-ghost btn-sm" style="background:#eee;color:#1a1d23;border:none" onclick="duplicateDoc(${d.id})">Copy</button>
         <button class="btn btn-danger btn-sm" onclick="confirmDelete(${d.id},'${esc(d.number||'this document')}')">Del</button>
       </div></td>
@@ -91,12 +91,12 @@ function confirmDelete(id, label) {
 function closeModal() { document.getElementById('modal-overlay').style.display='none'; pendingDeleteId=null; }
 async function doDelete() {
   const id = pendingDeleteId; closeModal();
-  const json = await fetch(`/api/documents/${id}/delete`,{method:'POST'}).then(r=>r.json());
+  const json = await fetch(`${BASE}/api/documents/${id}/delete`,{method:'POST'}).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   toast('Deleted','success'); loadDocs();
 }
 async function duplicateDoc(id) {
-  const json = await fetch(`/api/documents/${id}/duplicate`,{method:'POST'}).then(r=>r.json());
+  const json = await fetch(`${BASE}/api/documents/${id}/duplicate`,{method:'POST'}).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   toast('Duplicated','success'); loadDocs();
 }

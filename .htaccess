@@ -1,0 +1,20 @@
+# DocEditor — Apache / XAMPP (project folder inside htdocs, e.g. http://localhost/DocEditor/)
+# Requires mod_rewrite and AllowOverride All (both are the XAMPP defaults).
+
+Options -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Never serve secrets, source or internals over HTTP
+    RewriteRule (^|/)\.(?!well-known) - [F,L]
+    RewriteRule ^(app|config|database|resources|routes|vendor|legacy)(/|$) - [F,L]
+    RewriteRule ^(bootstrap\.php|composer\.(json|lock)|README\.md)$ - [F,L]
+
+    # Real files (assets/editor.css, assets/logo.png, ...) are served as-is.
+    # Everything else (/api/..., /editor, /customers, ...) goes to the front controller.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>

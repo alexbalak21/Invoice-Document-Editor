@@ -56,7 +56,7 @@
 async function loadCustomers() {
   const q = document.getElementById('search-input').value.trim();
   try {
-    const json = await fetch(`/api/customers?q=${encodeURIComponent(q)}`).then(r => r.json());
+    const json = await fetch(`${BASE}/api/customers?q=${encodeURIComponent(q)}`).then(r => r.json());
     if (!json.ok) throw new Error(json.error);
     renderList(json.customers);
   } catch(e) {
@@ -101,7 +101,7 @@ function openForm(id=null) {
 function closeForm() { document.getElementById('cust-form-card').style.display='none'; document.getElementById('edit-id').value=''; }
 
 async function editCustomer(id) {
-  const json = await fetch(`/api/customers/${id}`).then(r=>r.json());
+  const json = await fetch(`${BASE}/api/customers/${id}`).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   const c = json.customer;
   openForm(id);
@@ -114,7 +114,7 @@ async function saveCustomer() {
   const name = document.getElementById('fc-name').value.trim();
   if (!name) { toast('Name is required','error'); return; }
   const body = { name, address:v('fc-addr'), city:v('fc-city'), contact:v('fc-contact'), phone:v('fc-phone'), vat:v('fc-vat') };
-  const url  = id ? `/api/customers/${id}` : '/api/customers';
+  const url  = id ? `${BASE}/api/customers/${id}` : BASE+'/api/customers';
   const json = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   toast(id ? 'Customer updated' : 'Customer created', 'success');
@@ -131,7 +131,7 @@ function confirmDelete(id, name) {
 function closeModal() { document.getElementById('modal-overlay').style.display='none'; pendingId=null; }
 async function doDelete() {
   const id = pendingId; closeModal();
-  const json = await fetch(`/api/customers/${id}/delete`,{method:'POST'}).then(r=>r.json());
+  const json = await fetch(`${BASE}/api/customers/${id}/delete`,{method:'POST'}).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   toast('Deleted','success'); loadCustomers();
 }
@@ -139,7 +139,7 @@ document.getElementById('modal-overlay').addEventListener('click',function(e){if
 
 // Export
 document.getElementById('btn-export').addEventListener('click', async () => {
-  const json = await fetch('/api/customers').then(r=>r.json());
+  const json = await fetch(BASE+'/api/customers').then(r=>r.json());
   if (!json.ok) { toast('Export failed','error'); return; }
   const clean = json.customers.map(({id,created_at,updated_at,...c})=>c);
   const a = document.createElement('a');
@@ -157,7 +157,7 @@ document.getElementById('btn-import').addEventListener('change', function() {
     const data = JSON.parse(e.target.result);
     for (const c of data) {
       if (!c.name) { failed++; continue; }
-      const json = await fetch('/api/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(c)}).then(r=>r.json());
+      const json = await fetch(BASE+'/api/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(c)}).then(r=>r.json());
       json.ok ? saved++ : failed++;
     }
     toast(failed ? `Imported ${saved}, skipped ${failed}` : `Imported ${saved}`,'success');

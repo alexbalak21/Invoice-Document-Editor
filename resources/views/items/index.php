@@ -55,7 +55,7 @@
 async function loadItems() {
   const q = document.getElementById('search-input').value.trim();
   try {
-    const json = await fetch(`/api/items?q=${encodeURIComponent(q)}`).then(r => r.json());
+    const json = await fetch(`${BASE}/api/items?q=${encodeURIComponent(q)}`).then(r => r.json());
     if (!json.ok) throw new Error(json.error);
     renderList(json.items);
   } catch(e) {
@@ -114,7 +114,7 @@ function openForm(id=null) {
 function closeForm() { document.getElementById('item-form-card').style.display='none'; document.getElementById('edit-id').value=''; }
 
 async function editItem(id) {
-  const json = await fetch(`/api/items/${id}`).then(r=>r.json());
+  const json = await fetch(`${BASE}/api/items/${id}`).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   const it = json.item;
   openForm(id);
@@ -128,7 +128,7 @@ async function saveItem() {
   if (!ref)   { toast('Reference is required','error'); return; }
   if (!title) { toast('Title is required','error');     return; }
   const body = { reference:ref, title, unit:v('fi-unit'), price:v('fi-price'), description:v('fi-desc') };
-  const url  = id ? `/api/items/${id}` : '/api/items';
+  const url  = id ? `${BASE}/api/items/${id}` : BASE+'/api/items';
   const json = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   toast(id ? 'Item updated' : 'Item created','success');
@@ -145,7 +145,7 @@ function confirmDelete(id, title) {
 function closeModal() { document.getElementById('modal-overlay').style.display='none'; pendingId=null; }
 async function doDelete() {
   const id = pendingId; closeModal();
-  const json = await fetch(`/api/items/${id}/delete`,{method:'POST'}).then(r=>r.json());
+  const json = await fetch(`${BASE}/api/items/${id}/delete`,{method:'POST'}).then(r=>r.json());
   if (!json.ok) { toast('Error: '+json.error,'error'); return; }
   toast('Deleted','success'); loadItems();
 }
@@ -153,7 +153,7 @@ document.getElementById('modal-overlay').addEventListener('click',function(e){if
 
 // Export
 document.getElementById('btn-export').addEventListener('click', async () => {
-  const json = await fetch('/api/items').then(r=>r.json());
+  const json = await fetch(BASE+'/api/items').then(r=>r.json());
   if (!json.ok) { toast('Export failed','error'); return; }
   const clean = json.items.map(({id,created_at,updated_at,...it})=>it);
   const a = document.createElement('a');
@@ -172,7 +172,7 @@ document.getElementById('btn-import').addEventListener('change', function() {
     if (!Array.isArray(data)) { toast('Expected a JSON array','error'); return; }
     for (const it of data) {
       if (!it.reference || !it.title) { failed++; continue; }
-      const json = await fetch('/api/items',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(it)}).then(r=>r.json());
+      const json = await fetch(BASE+'/api/items',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(it)}).then(r=>r.json());
       json.ok ? saved++ : failed++;
     }
     toast(failed ? `Imported ${saved}, skipped ${failed}` : `Imported ${saved} item(s)`,'success');

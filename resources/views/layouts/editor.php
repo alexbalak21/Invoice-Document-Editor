@@ -4,15 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($title ?? 'Editor') ?> — DocEditor</title>
-  <link rel="stylesheet" href="/assets/editor.css">
-  <link rel="stylesheet" href="/assets/document.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/editor.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/document.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <style>html,body{height:100%;overflow:hidden;} .app-body{height:calc(100vh - var(--topbar-h));}</style>
+  <script>const BASE = <?= json_encode(BASE_URL) ?>;</script>
 </head>
 <body>
 
 <header class="topbar">
-  <a href="/documents" class="topbar-brand">
+  <a href="<?= BASE_URL ?>/documents" class="topbar-brand">
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <rect x="3" y="2" width="14" height="16" rx="2" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="1.5"/>
       <line x1="6" y1="7" x2="14" y2="7" stroke="white" stroke-width="1.2"/>
@@ -25,9 +26,9 @@
   <span id="topbar-type-badge" class="topbar-doc-type">INVOICE</span>
 
   <nav class="topbar-nav" style="margin-left:12px">
-    <a href="/documents"><i class="fa-solid fa-arrow-left"></i> History</a>
-    <a href="/customers"><i class="fa-solid fa-users"></i> Customers</a>
-    <a href="/items"><i class="fa-solid fa-boxes-stacked"></i> Items</a>
+    <a href="<?= BASE_URL ?>/documents"><i class="fa-solid fa-arrow-left"></i> History</a>
+    <a href="<?= BASE_URL ?>/customers"><i class="fa-solid fa-users"></i> Customers</a>
+    <a href="<?= BASE_URL ?>/items"><i class="fa-solid fa-boxes-stacked"></i> Items</a>
   </nav>
 
   <div class="topbar-actions" style="margin-left:auto">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title><?= htmlspecialchars(($doc['type'] ?? 'DOCUMENT') . ' ' . ($doc['number'] ?? '')) ?></title>
-  <link rel="stylesheet" href="/assets/document.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/document.css">
   <style>
     body { background: #ececec; margin: 0; }
     .page { margin: 24px auto; }

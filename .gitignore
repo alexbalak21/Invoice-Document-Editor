@@ -2,4 +2,5 @@
 vendor/
 *.sqlite
 *.log
-.vscode/
+storage/sessions/*
+!storage/sessions/.gitkeep

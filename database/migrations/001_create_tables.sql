@@ -1,11 +1,5 @@
--- DocEditor — MySQL schema
--- Run once: mysql -u root -p doceditor < database/migrations/001_create_tables.sql
-
-CREATE DATABASE IF NOT EXISTS doceditor
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE doceditor;
+-- DocEditor — MySQL schema. Import it into the database you selected
+-- (php database/migrate.php does this for you, or use phpMyAdmin's Import tab).
 
 CREATE TABLE IF NOT EXISTS documents (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

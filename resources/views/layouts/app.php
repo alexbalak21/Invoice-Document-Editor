@@ -9,7 +9,7 @@
   <?php if (!empty($extraCss)): ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($extraCss) ?>">
   <?php endif; ?>
-  <script>const BASE = <?= json_encode(BASE_URL) ?>;</script>
+  <?php require ROOT . '/resources/views/partials/csrf_js.php'; ?>
 </head>
 <body>
 

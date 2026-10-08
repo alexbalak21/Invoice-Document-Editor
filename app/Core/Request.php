@@ -36,6 +36,32 @@ class Request
         return $this->body;
     }
 
+    /** True when the request came in over HTTPS (also behind a trusted proxy, see TRUSTED_PROXY). */
+    public static function isHttps(): bool
+    {
+        if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') return true;
+        if ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443) return true;
+        return Env::get('TRUSTED_PROXY', 'false') === 'true'
+            && strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+    }
+
+    /** Client IP. Only trusts X-Forwarded-For when TRUSTED_PROXY=true (i.e. you sit behind a proxy/CDN). */
+    public static function ip(): string
+    {
+        if (Env::get('TRUSTED_PROXY', 'false') === 'true' && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $first = trim(explode(',', (string) $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+            if (filter_var($first, FILTER_VALIDATE_IP)) return $first;
+        }
+        return (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+    }
+
+    /** CSRF token sent by a form (_token) or by fetch() (X-CSRF-Token header). */
+    public static function csrfToken(): ?string
+    {
+        $t = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_POST['_token'] ?? null;
+        return is_string($t) ? $t : null;
+    }
+
     public function method(): string
     {
         return $_SERVER['REQUEST_METHOD'];

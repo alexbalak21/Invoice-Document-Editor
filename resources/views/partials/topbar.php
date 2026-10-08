@@ -37,4 +37,5 @@ $nav = [
   <?php if (!empty($topbarActions)): ?>
     <div class="topbar-actions"><?= $topbarActions ?></div>
   <?php endif; ?>
+  <?php require ROOT . '/resources/views/partials/user_menu.php'; ?>
 </header>

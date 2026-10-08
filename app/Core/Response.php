@@ -21,6 +21,20 @@ class Response
         self::json(array_merge(['ok' => true], $data));
     }
 
+    /** Redirect to a path inside the app (BASE_URL is added), e.g. Response::redirect('/login'). */
+    public static function redirect(string $path, int $status = 302): never
+    {
+        self::redirectTo(BASE_URL . $path, $status);
+    }
+
+    /** Redirect to a full local path that already includes BASE_URL. */
+    public static function redirectTo(string $location, int $status = 302): never
+    {
+        http_response_code($status);
+        header('Location: ' . $location);
+        exit;
+    }
+
     public static function error(string $message, int $status = 400): never
     {
         self::json(['ok' => false, 'error' => $message], $status);

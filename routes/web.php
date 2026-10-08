@@ -3,9 +3,24 @@
 use App\Controllers\DocumentController;
 use App\Controllers\CustomerController;
 use App\Controllers\ItemController;
+use App\Controllers\AuthController;
+use App\Controllers\ProfileController;
 use App\Controllers\Api\DocumentApiController;
 use App\Controllers\Api\CustomerApiController;
 use App\Controllers\Api\ItemApiController;
+
+/**
+ * Authentication — everything else requires a logged-in user (see Router::guard)
+ */
+$router->get('/login',   [AuthController::class, 'showLogin'], ['public' => true]);
+$router->post('/login',  [AuthController::class, 'login'],     ['public' => true]);
+$router->post('/logout', [AuthController::class, 'logout'],    ['public' => true, 'csrf' => false]);
+
+$router->get('/profile',           [ProfileController::class, 'show']);
+$router->post('/profile',          [ProfileController::class, 'update']);
+$router->post('/profile/password', [ProfileController::class, 'password']);
+
+$router->get('/api/csrf', [AuthController::class, 'csrf']);
 
 /**
  * Web routes — HTML pages

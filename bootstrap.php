@@ -36,6 +36,20 @@ if (is_file(ROOT . '/vendor/autoload.php')) {
     \App\Core\Env::load(ROOT . '/.env');
 }
 
+require_once ROOT . '/app/Core/helpers.php';
+
+// ── Security headers (web requests only) ──────────────────────
+if (PHP_SAPI !== 'cli' && !headers_sent()) {
+    header_remove('X-Powered-By');
+    header('X-Frame-Options: DENY');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: same-origin');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+    if (\App\Core\Request::isHttps()) {
+        header('Strict-Transport-Security: max-age=15552000');
+    }
+}
+
 // ── Error handling ────────────────────────────────────────────
 $debug = \App\Core\Env::get('APP_DEBUG', 'false') === 'true';
 ini_set('display_errors', $debug ? '1' : '0');
@@ -43,6 +57,7 @@ error_reporting($debug ? E_ALL : 0);
 
 if (!$debug) {
     set_exception_handler(function (Throwable $e): void {
+        error_log((string) $e);   // details go to the server error log, never to the browser
         $isApi = str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/');
         if ($isApi) {
             \App\Core\Response::error('Internal server error', 500);

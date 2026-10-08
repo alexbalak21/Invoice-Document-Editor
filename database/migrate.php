@@ -23,19 +23,21 @@ echo "Host:     $host:$port\n";
 echo "Database: $dbname\n";
 echo "User:     $user\n\n";
 
-// Connect without specifying database first, to create it if needed
+$pdoOptions = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
 try {
-    $pdo = new PDO(
-        "mysql:host=$host;port=$port;charset=utf8mb4",
-        $user, $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname`
-                CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    echo "✓ Database '$dbname' ready.\n";
+    // Normal case (shared hosting): the database already exists and your user can only use it
+    new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass, $pdoOptions);
+    echo "✓ Database '$dbname' reachable.\n";
 } catch (PDOException $e) {
-    echo "✗ Connection failed: " . $e->getMessage() . "\n";
-    exit(1);
+    // Local development: the database may simply not exist yet — try to create it
+    try {
+        $pdo = new PDO("mysql:host=$host;port=$port;charset=utf8mb4", $user, $pass, $pdoOptions);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        echo "✓ Database '$dbname' created.\n";
+    } catch (PDOException $e2) {
+        echo "✗ Connection failed: " . $e2->getMessage() . "\n";
+        exit(1);
+    }
 }
 
 // Run all .sql files in order
@@ -53,12 +55,9 @@ foreach ($files as $file) {
             $user, $pass,
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
-        $sql = file_get_contents($file);
-        // Split on semicolons and run each statement
-        $statements = array_filter(
-            array_map('trim', explode(';', $sql)),
-            fn($s) => $s !== '' && !preg_match('/^--/', $s) && !preg_match('/^\/\*/', $s)
-        );
+        // Drop "-- comment" lines first, then split on semicolons and run each statement
+        $sql = preg_replace('/^\s*--.*$/m', '', file_get_contents($file));
+        $statements = array_filter(array_map('trim', explode(';', $sql)), fn($s) => $s !== '');
         foreach ($statements as $stmt) {
             if (trim($stmt) !== '') $pdo2->exec($stmt);
         }

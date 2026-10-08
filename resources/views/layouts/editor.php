@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/document.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <style>html,body{height:100%;overflow:hidden;} .app-body{height:calc(100vh - var(--topbar-h));}</style>
-  <script>const BASE = <?= json_encode(BASE_URL) ?>;</script>
+  <?php require ROOT . '/resources/views/partials/csrf_js.php'; ?>
 </head>
 <body>
 
@@ -48,6 +48,7 @@
     <button class="btn btn-ghost btn-sm" id="btn-print"><i class="fa-solid fa-print"></i> Print</button>
     <button class="btn btn-primary btn-sm" id="btn-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
   </div>
+  <?php $compactUserMenu = true; $afterActions = true; require ROOT . '/resources/views/partials/user_menu.php'; ?>
 </header>
 
 <?= $content ?>

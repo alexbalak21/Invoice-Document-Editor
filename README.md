@@ -246,3 +246,59 @@ No more `api.php?action=X` — URLs are clean REST paths.
 
 **Views are plain PHP.** No templating engine. Layouts use output buffering
 (`Response::view()` captures the view into `$content`, then includes the layout).
+
+---
+
+## Authentication
+
+Login / logout only — **there is no registration page.** Users are created by you.
+
+| What | How |
+|---|---|
+| Sign in | `/login` (email + password). Every other page and every `/api/...` route requires it. |
+| Sign out | "Log out" button in the top bar (POST + CSRF). |
+| Profile | `/profile` — change name, email and password. Changing the email or the password asks for the current password. |
+| Create a user / reset a forgotten password | `php database/create_user.php` (see below) |
+
+**Passwords** are stored with `password_hash()` (bcrypt), 10–72 characters. Changing a password signs out every
+*other* device (`users.auth_version`).
+
+**Protection built in:** sessions are HttpOnly + SameSite=Lax (+ Secure on HTTPS), regenerated on login; CSRF token on every
+POST (forms and `fetch()`); login throttling (5 failed attempts per email+IP or 20 per IP → locked for ~15 min);
+generic "Invalid email or password" message with constant-time-style checks; open-redirect-safe `next=`; idle timeout
+(`SESSION_LIFETIME`, default 120 min); security headers (X-Frame-Options, nosniff, Referrer-Policy, HSTS on HTTPS).
+
+> All users share the same data (documents, customers, items) — accounts are not separate workspaces.
+
+### Creating users
+
+```bash
+php database/create_user.php                          # asks name, email, password (hidden)
+php database/create_user.php "Jane Doe" jane@site.com # asks only for the password
+php database/create_user.php --sql                    # no DB needed: prints an INSERT to paste into phpMyAdmin
+```
+Run it again with an existing email to **reset that user's password**.
+
+---
+
+## Deploying to a web server
+
+1. **Upload** the project (everything except your local `.env`).
+2. In your hosting panel create a **MySQL database + user**.
+3. Create **`.env`** on the server (copy `.env.example`) and fill in the DB credentials.
+   Keep `APP_ENV=production` and **`APP_DEBUG=false`** — debug mode prints error details in the browser.
+4. **Create the tables:** `php database/migrate.php` (SSH) *or* import
+   `database/migrations/001_create_tables.sql` then `003_auth.sql` in phpMyAdmin (Import tab, with your database selected).
+5. **Create your user:** `php database/create_user.php` (SSH) *or* run `php database/create_user.php --sql` on your computer
+   and paste the generated `INSERT` into phpMyAdmin's SQL tab.
+6. Make sure **`storage/sessions/`** is writable by the web server (if it isn't, PHP's default session folder is used).
+7. Turn on **HTTPS** and uncomment the 3 redirect lines in `.htaccess`.
+   Behind Cloudflare / a reverse proxy set `TRUSTED_PROXY=true` in `.env` (otherwise leave it `false`).
+8. **Check that secrets are not downloadable** (both must answer 403 or 404):
+   ```bash
+   curl -I https://your-site.com/DocEditor/.env
+   curl -I https://your-site.com/DocEditor/app/Core/Env.php
+   ```
+
+If your host lets you choose the **document root**, point it at `public/` (and move `assets/` into `public/assets/`) —
+then nothing but `public/` is reachable from the web at all. Otherwise the root `.htaccess` does the blocking.

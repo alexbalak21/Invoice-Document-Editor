@@ -9,8 +9,13 @@ DirectoryIndex index.php
 
     # Never serve secrets, source or internals over HTTP
     RewriteRule (^|/)\.(?!well-known) - [F,L]
-    RewriteRule ^(app|config|database|resources|routes|vendor|legacy)(/|$) - [F,L]
+    RewriteRule ^(app|config|database|resources|routes|storage|vendor|legacy)(/|$) - [F,L]
     RewriteRule ^(bootstrap\.php|composer\.(json|lock)|README\.md)$ - [F,L]
+
+    # Force HTTPS once your certificate is installed (uncomment the 3 lines)
+    # RewriteCond %{HTTPS} !=on
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Real files (assets/editor.css, assets/logo.png, ...) are served as-is.
     # Everything else (/api/..., /editor, /customers, ...) goes to the front controller.

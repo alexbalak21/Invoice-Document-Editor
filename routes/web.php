@@ -23,16 +23,16 @@ $router->get('/documentation',  [DocumentController::class, 'documentation']);
  * API routes — JSON responses
  */
 
-// Documents
-$router->get('/api/documents',              [DocumentApiController::class, 'index']);
-$router->get('/api/documents/:id',          [DocumentApiController::class, 'show']);
-$router->post('/api/documents',             [DocumentApiController::class, 'store']);
-$router->post('/api/documents/:id',         [DocumentApiController::class, 'update']);
-$router->post('/api/documents/:id/delete',  [DocumentApiController::class, 'destroy']);
+// Documents — static routes MUST come before :id routes
+$router->get('/api/documents',                [DocumentApiController::class, 'index']);
+$router->get('/api/documents/default',        [DocumentApiController::class, 'default']);
+$router->get('/api/numbers/next',             [DocumentApiController::class, 'nextNumber']);
+$router->get('/api/numbers/peek',             [DocumentApiController::class, 'peekNumber']);
+$router->get('/api/documents/:id',            [DocumentApiController::class, 'show']);
+$router->post('/api/documents',               [DocumentApiController::class, 'store']);
+$router->post('/api/documents/:id',           [DocumentApiController::class, 'update']);
+$router->post('/api/documents/:id/delete',    [DocumentApiController::class, 'destroy']);
 $router->post('/api/documents/:id/duplicate', [DocumentApiController::class, 'duplicate']);
-$router->get('/api/documents/default',      [DocumentApiController::class, 'default']);
-$router->get('/api/numbers/next',           [DocumentApiController::class, 'nextNumber']);
-$router->get('/api/numbers/peek',           [DocumentApiController::class, 'peekNumber']);
 
 // Customers
 $router->get('/api/customers',              [CustomerApiController::class, 'index']);

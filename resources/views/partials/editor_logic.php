@@ -432,9 +432,11 @@ async function init(){
   } else {
     try{
       const json=await fetch(API.docDefault(NEW_TYPE)).then(r=>r.json());
-      docData=json.data;
-    }catch{docData={};}
-    docData.type=NEW_TYPE; populateForm(docData); renderPreview(docData);
+      docData=json.ok ? json.data : {};
+    }catch{ docData={}; }
+    if(!docData) docData={};
+    docData.type=NEW_TYPE;
+    populateForm(docData); renderPreview(docData);
     setAutosaveStatus('','New document — not saved yet');
   }
 }

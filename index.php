@@ -18,3 +18,4 @@ if (is_file($path)) {
 
 // Everything else goes through the front controller
 require __DIR__ . '/public/index.php';
+    

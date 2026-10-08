@@ -94,8 +94,16 @@ function addItemRow(item = {}) {
 wire('btn-add-item', 'click', () => { addItemRow(); onFormChange(); });
 
 // ── Populate form ─────────────────────────────────────────────
+// The type <select> only lists the 4 usual types; add any other value (e.g. PROFORMA) on the fly
+function setType(t) {
+  const sel = document.getElementById('f-type'); if (!sel) return;
+  t = String(t || 'INVOICE').trim().toUpperCase();
+  if (![...sel.options].some(o => o.value === t)) sel.add(new Option(t, t));
+  sel.value = t;
+}
+
 function populateForm(d) {
-  set('f-type', d.type??'INVOICE'); set('f-number',d.number??''); set('f-date',d.date??'');
+  setType(d.type??'INVOICE'); set('f-number',d.number??''); set('f-date',d.date??'');
   set('f-due-date',d.due_date??'');
   set('f-service-start',d.service_date_start??d.service_date??''); set('f-service-end',d.service_date_end??'');
   set('f-po',d.po_number??'');
@@ -119,7 +127,7 @@ function populateForm(d) {
   set('f-bank-name',b.bank_name??''); set('f-bank-addr',b.bank_address??'');
   set('f-bank-iban',b.iban??''); set('f-bank-bic',b.bic??'');
   document.getElementById('items-tbody').innerHTML = '';
-  (d.items??[]).forEach(addItemRow);
+  (Array.isArray(d.items)?d.items:[]).forEach(addItemRow);
   updateTopBar(d);
 }
 function set(id,val){const el=document.getElementById(id);if(el)el.value=val;}
@@ -332,22 +340,63 @@ wire('btn-export', 'click',()=>{
   a.download=name+'.json'; a.click(); toast('Exported '+name+'.json','success');
 });
 
-// ── Import JSON ───────────────────────────────────────────────
-wire('btn-import', 'change',function(){
-  const file=this.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      let d=JSON.parse(e.target.result);
-      // Unwrap _value annotations (Model JSON)
-      d=unwrapModelJson(d);
-      docData=d; populateForm(d); renderPreview(d);
-      isDirty=true; scheduleAutoSave(); toast('JSON imported','success');
-    }catch(err){toast('Import failed: '+err.message,'error');}
-    this.value='';
+// ── Import JSON (file or pasted text) ─────────────────────────
+// AI chats usually wrap JSON in ```json fences or add a sentence around it — tolerate both.
+function parseJsonLoose(text) {
+  const raw = String(text).trim();
+  if (!raw) throw new Error('nothing to import, the text is empty');
+  const candidates = [raw];
+  const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) candidates.push(fence[1].trim());
+  const a = raw.indexOf('{'), b = raw.lastIndexOf('}');
+  if (a !== -1 && b > a) candidates.push(raw.slice(a, b + 1));
+  let firstErr = null;
+  for (const c of candidates) {
+    try { return JSON.parse(c); } catch (e) { firstErr = firstErr || e; }
+  }
+  throw firstErr;
+}
+
+// Shared by "Import JSON" (file) and "Paste JSON" (text): parse → unwrap Model JSON → fill form
+function importDocText(text) {
+  const d = unwrapModelJson(parseJsonLoose(text));
+  if (!d || typeof d !== 'object' || Array.isArray(d)) throw new Error('expected a JSON object describing one document');
+  populateForm(d);
+  onFormChange();   // refresh docData, live preview, top bar and schedule the auto-save
+}
+
+wire('btn-import', 'change', function () {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { importDocText(e.target.result); toast('JSON imported', 'success'); }
+    catch (err) { toast('Import failed: ' + err.message, 'error'); }
+    this.value = '';
   };
   reader.readAsText(file);
 });
+
+// ── Paste JSON modal ──────────────────────────────────────────
+function openPasteModal() {
+  document.getElementById('paste-modal').style.display = 'flex';
+  document.getElementById('paste-error').textContent = '';
+  const ta = document.getElementById('paste-json'); ta.focus(); ta.select();
+}
+function closePasteModal() { document.getElementById('paste-modal').style.display = 'none'; }
+function loadPastedJson() {
+  const ta = document.getElementById('paste-json'), errEl = document.getElementById('paste-error');
+  try {
+    importDocText(ta.value);
+    ta.value = ''; errEl.textContent = '';
+    closePasteModal();
+    toast('JSON loaded into the editor', 'success');
+  } catch (e) {
+    errEl.textContent = 'Could not load: ' + e.message;
+  }
+}
+wire('btn-paste', 'click', openPasteModal);
+wire('btn-paste-load', 'click', loadPastedJson);
+wire('paste-json', 'keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); loadPastedJson(); } });
 
 function unwrapModelJson(obj) {
   if(Array.isArray(obj))return obj.map(unwrapModelJson);
@@ -429,7 +478,7 @@ async function selectItem(id){
   closeItemPicker(); onFormChange(); toast('Item added: '+it.title,'success');
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCustomerPicker();closeItemPicker();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCustomerPicker();closeItemPicker();closePasteModal();}});
 
 function toast(msg,type=''){
   const c=document.getElementById('toast-container');

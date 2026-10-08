@@ -23,7 +23,7 @@ class DocumentController
             'title'   => $id ? "Edit Document #$id" : "New $type",
             'editId'  => $id,
             'newType' => $type,
-        ]);
+        ], layout: 'editor');
     }
 
     public function preview(): void

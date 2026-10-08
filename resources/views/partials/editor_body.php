@@ -163,6 +163,25 @@
   </div>
 </div>
 
+<!-- Paste JSON modal -->
+<div id="paste-modal" class="cust-modal-overlay" style="display:none" onclick="if(event.target===this)closePasteModal()">
+  <div class="cust-modal paste-modal">
+    <div class="cust-modal-header"><h3><i class="fa-solid fa-paste"></i> Paste JSON</h3>
+      <button class="cust-modal-close" onclick="closePasteModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="paste-body">
+      <textarea id="paste-json" class="paste-area" spellcheck="false" placeholder="Paste the JSON your AI assistant generated here…"></textarea>
+      <div id="paste-error" class="paste-error"></div>
+    </div>
+    <div class="cust-modal-footer paste-footer">
+      <span class="paste-hint">Replaces the current form · Ctrl+Enter to load</span>
+      <span style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="closePasteModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="btn-paste-load"><i class="fa-solid fa-file-import"></i> Load into editor</button>
+      </span>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Constants injected from PHP ───────────────────────────────
 const EDIT_ID      = <?= $editId ? (int)$editId : 'null' ?>;

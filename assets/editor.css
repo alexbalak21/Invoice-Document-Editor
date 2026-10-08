@@ -413,3 +413,20 @@ html, body { height: 100%; overflow: hidden; font-family: var(--font); color: va
 }
 .input-with-btn button:hover { background: rgba(55,113,200,.08); }
 .input-with-btn button:disabled { opacity: .4; cursor: not-allowed; }
+/* ── Buttons on the blue topbar keep the white look (btn-primary is blue elsewhere) ── */
+.topbar .btn-primary { background: white; color: var(--ui-primary); }
+.topbar .btn-primary:hover { background: #e8effc; }
+
+/* ── Paste JSON modal ── */
+.cust-modal.paste-modal { width: 720px; max-height: 90vh; }
+.paste-body { padding: 14px 16px 0; overflow-y: auto; }
+.paste-area {
+  width: 100%; height: min(340px, 45vh); resize: vertical;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
+  padding: 10px 12px; border: 1px solid var(--ui-input-border); border-radius: 5px;
+  background: var(--ui-input-bg); color: var(--ui-text); outline: none;
+}
+.paste-area:focus { border-color: var(--ui-focus); box-shadow: 0 0 0 2px rgba(55,113,200,.12); }
+.paste-error { color: var(--ui-danger); font-size: 12px; min-height: 20px; margin: 6px 0 8px; }
+.paste-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.paste-hint { font-size: 11.5px; color: var(--ui-text-muted); }
